@@ -1,0 +1,75 @@
+# Prerequisites
+*.d
+
+# Object files
+*.o
+*.ko
+*.obj
+*.elf
+
+# Linker output
+*.ilk
+*.map
+*.exp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
+# Debug files
+*.dSYM/
+*.su
+*.idb
+*.pdb
+
+# Kernel Module Compile Results
+*.mod*
+*.cmd
+.tmp_versions/
+modules.order
+Module.symvers
+Mkfile.old
+dkms.conf
+
+#Official Infantry Program (reference only)
+Infantry_Official/
+
+#JLINK log and IDE files
+*JLink*
+*uvgui*
+*uvguix*
+*.saved_uv4
+*.dep
+*.scvd
+*.ini
+*.bak
+
+
+#Output repos
+*/Outputs/
+*/DebugConfig/
+*.htm
+*.axf
+*.lnp
+*.plg
+*.sct
+*.crf
+
