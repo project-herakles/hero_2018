@@ -500,6 +500,26 @@
               <FileType>1</FileType>
               <FilePath>..\Src\ramp.c</FilePath>
             </File>
+            <File>
+              <FileName>collect.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\collect.c</FilePath>
+            </File>
+            <File>
+              <FileName>lifter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\lifter.c</FilePath>
+            </File>
+            <File>
+              <FileName>stepper.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\stepper.c</FilePath>
+            </File>
+            <File>
+              <FileName>claw.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\claw.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
