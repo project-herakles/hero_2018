@@ -117,6 +117,8 @@ int main(void)
 	dbus_uart_init();
 	CAN_Initialize();
 	imu_param_init();
+	
+	Test_Task_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

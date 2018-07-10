@@ -75,8 +75,6 @@ void Remote_Control(Remote *rc)
 	{
 		chassis_speed_ref.forward_back_ref = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET) * STICK_TO_CHASSIS_SPEED_REF_FACT;
     chassis_speed_ref.left_right_ref   = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET) * STICK_TO_CHASSIS_SPEED_REF_FACT; 
-		chassis_speed_ref.rotate_ref = (rc->ch2 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET) * STICK_TO_CHASSIS_ROTATE_REF_FACT;
-		//chassis_speed_ref.rotate_ref = (rc->ch2 - 1014) * STICK_TO_CHASSIS_ROTATE_REF_FACT; //according to experiment
 	}
 }
 

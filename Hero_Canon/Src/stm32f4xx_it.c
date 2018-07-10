@@ -259,9 +259,9 @@ void TIM6_DAC_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
 	//RED_LED_TOGGLE();
-	Control_Task();//called every 1ms
-	
-	GREEN_LED_TOGGLE();
+	//Control_Task();//called every 1ms
+	Test_Task();
+	//GREEN_LED_TOGGLE();
 	//RED_LED_OFF();
 	
 	
