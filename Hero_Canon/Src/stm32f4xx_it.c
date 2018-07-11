@@ -48,6 +48,8 @@
 extern uint8_t RemoteBuffer[18];
 extern uint8_t canRxMsg[8];
 extern uint8_t canTxMsg[8];
+uint8_t stepper_left_lmode;
+uint8_t stepper_right_lmode;
 extern CAN_TxHeaderTypeDef can1TxHeader0;
 extern CAN_TxHeaderTypeDef can1TxHeader1;
 extern CAN_RxHeaderTypeDef can1RxHeader;
@@ -59,6 +61,7 @@ int16_t ch0;
 
 /* External variables --------------------------------------------------------*/
 extern CAN_HandleTypeDef hcan1;
+extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern UART_HandleTypeDef huart1;
@@ -240,6 +243,48 @@ void CAN1_RX0_IRQHandler(void)
   /* USER CODE BEGIN CAN1_RX0_IRQn 1 */
 
   /* USER CODE END CAN1_RX0_IRQn 1 */
+}
+
+/**
+* @brief This function handles TIM2 global interrupt.
+*/
+void TIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM2_IRQn 0 */
+	RED_LED_ON();
+	if(stepper_left.mode == MODE_SERVO)
+	{
+		// if mode switch happens, start rotating
+		if(stepper_left_lmode == MODE_MOTOR)
+		{
+			stepper_start(&stepper_left);
+		}
+		// if pulse counts to 0, stop the stepper
+		if(stepper_left.pulses-- ==0)
+		{
+			stepper_stop(&stepper_left);
+		}
+	}
+	
+	if(stepper_right.mode == MODE_SERVO)
+	{
+		if(stepper_left_lmode==MODE_MOTOR)
+		{
+			stepper_start(&stepper_left);
+		}
+		if(stepper_left.pulses-- ==0)
+		{
+			stepper_stop(&stepper_left);
+		}
+	}
+	// memorize last mode for reference
+	stepper_left_lmode = stepper_left.mode;
+	stepper_right_lmode = stepper_right.mode;
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
+
+  /* USER CODE END TIM2_IRQn 1 */
 }
 
 /**

@@ -19,19 +19,15 @@ void Test_Task_Init(void)
 	stepper_init(&stepper_left);
 	stepper_init(&stepper_right);
 	RED_LED_ON();
+	stepper_rotate(&stepper_left,CLOCKWISE,720);
 }
 
 void Test_Task(void)
 {
+	//stepper_stop(&stepper_left);
 	GREEN_LED_TOGGLE();
-	RED_LED_OFF();
-	static uint8_t waveLength = 1;
-	if(waveLength == 4)
-		waveLength = 0;
-	waveLength++;
-	HAL_TIM_PWM_Stop(&htim2,TIM_CHANNEL_1);
-	configPWMchannel(&htim2,TIM_CHANNEL_1,waveLength);
-	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
+	RED_LED_OFF(); 
+	/*
 	if(time_tick_ms%3000==0)
 	{
 		if(clockwise == CLOCKWISE)
@@ -47,6 +43,7 @@ void Test_Task(void)
 			clockwise = CLOCKWISE;
 		}
 	}
+	*/
 	
 	//CAN_SendMsg(&hcan1,canTxMsg);
 }

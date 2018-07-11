@@ -7,7 +7,7 @@
 //		-rpm£º the speed at which the stepper rotates.
 //		-period: a private variable to setup the period (hence PWM frequency) of the timer
 //		-pulses: a private variable to calculate the angular displacement
-
+//    -mode: a private variable to let the TIMER_IRQ handler decides whether it should stop the motor when pulses go to 0
 
 //		There are typically 2 approaches to controling the                               																									
 //		1. using stepper_start() and stepper_stop() pair. You may configure the speed, rotational direction by using stepper_config()
@@ -29,12 +29,18 @@
 #define STEPPER_TIM htim2
 #define CLOCKWISE 1
 #define COUNTER_CLOCKWISE 0
+#define MODE_MOTOR 0
+#define MODE_SERVO 1
 // The number of pulses it takes to revolve one cycle
 #define FULL_REV 200
 #define RADIUS 15
 #define RPM2RADIAN 0.1047
 #define STEP_ANGLE 1.8
 
+#define STEPPER_LEFT_ENABLE()							HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_RESET)
+#define STEPPER_RIGHT_ENABLE()						HAL_GPIO_WritePin(GPIOC,GPIO_PIN_3,GPIO_PIN_RESET)
+#define STEPPER_LEFT_DISABLE()						HAL_GPIO_WritePin(GPIOC,GPIO_PIN_2,GPIO_PIN_SET)
+#define STEPPER_RIGHT_DISABLE()						HAL_GPIO_WritePin(GPIOC,GPIO_PIN_3,GPIO_PIN_SET)
 #define STEPPER_LEFT_CLOCKWISE() 					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_RESET)
 #define STEPPER_LEFT_COUNTER_CLOCKWISE()  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_0,GPIO_PIN_SET)
 #define STEPPER_RIGHT_CLOCKWISE()					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_1,GPIO_PIN_RESET)
@@ -49,6 +55,7 @@ typedef struct
 	uint16_t rpm;
 	uint32_t period; // [PRIVATE]
 	uint32_t pulses;
+	uint8_t mode;
 }Stepper_Regulator_t;
 
 #define STEPPER_LEFT_REGULATOR_DEFAULT \
@@ -58,7 +65,8 @@ typedef struct
 	0, \
 	0, \
 	60, \
-	100 \
+	100, \
+	0, \
 } \
 
 #define STEPPER_RIGHT_REGULATOR_DEFAULT \
@@ -68,7 +76,8 @@ typedef struct
 	0, \
 	0, \
 	60, \
-	100 \
+	100, \
+	0, \
 } \
 
 void stepper_init(Stepper_Regulator_t * stp);
@@ -77,7 +86,7 @@ void stepper_start(Stepper_Regulator_t *stp);
 void stepper_stop(Stepper_Regulator_t *stp);
 void stepper_hold(Stepper_Regulator_t *stp);
 void stepper_idle(Stepper_Regulator_t *stp);
-void stpper_rotate(Stepper_Regulator_t *stp,uint8_t cw, float degree);
+void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw, float degree);
 void stepper_raise(Stepper_Regulator_t *stp,uint16_t mm);
 void stepper_lower(Stepper_Regulator_t *stp, uint16_t mm);
 void stepper_setHeight(Stepper_Regulator_t *stpr, uint16_t mm);

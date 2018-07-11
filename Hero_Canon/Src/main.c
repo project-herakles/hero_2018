@@ -44,7 +44,6 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "imu_task.h"
 
 /* USER CODE BEGIN Includes */
 #include "testTask.h"
@@ -112,7 +111,8 @@ int main(void)
 	RED_LED_OFF();
 	GREEN_LED_OFF();
 	HAL_TIM_Base_Start_IT(&htim6);
-	HAL_TIM_PWM_Init(&htim2);
+	HAL_TIM_Base_Start_IT(&htim2);
+	//HAL_TIM_PWM_Init(&htim2);
 	
 	dbus_uart_init();
 	CAN_Initialize();

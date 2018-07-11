@@ -8,12 +8,14 @@ Stepper_Regulator_t stepper_right = STEPPER_RIGHT_REGULATOR_DEFAULT;
 
 void stepper_init(Stepper_Regulator_t * stp)
 {
-	// cw pin configuration GPIOC0&C1
+	stp->enable = 0;
+	stp->pulses = 0;
+	// cw pins and enable pins configuration GPIOC0&C1
 	GPIO_InitTypeDef GPIO_InitStruct;
 
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	
-	GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1;
+	GPIO_InitStruct.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
@@ -68,6 +70,8 @@ void stepper_init(Stepper_Regulator_t * stp)
     _Error_Handler(__FILE__, __LINE__);
   }
   HAL_TIM_MspPostInit(&htim2);
+	HAL_TIM_Base_Start_IT(&htim2);
+	stepper_stop(stp);
 }
 
 
@@ -122,12 +126,60 @@ void stepper_apply(Stepper_Regulator_t * stp)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
+	HAL_TIM_Base_Start_IT(&htim2);
   HAL_TIM_MspPostInit(&htim2);
+}
+
+void stepper_enable(Stepper_Regulator_t *stp)
+{
+	switch(stp->id)
+	{
+		case STEPPER_LEFT:
+		{
+			STEPPER_LEFT_ENABLE();
+		}break;
+		case STEPPER_RIGHT:
+		{
+			STEPPER_RIGHT_ENABLE();
+		}break;
+	}
+}
+
+void stepper_disable(Stepper_Regulator_t *stp)
+{
+	switch(stp->id)
+	{
+		case STEPPER_LEFT:
+		{
+			STEPPER_LEFT_DISABLE();
+		}break;
+		case STEPPER_RIGHT:
+		{
+			STEPPER_RIGHT_DISABLE();
+		}break;
+	}
 }
 
 void stepper_setDir(Stepper_Regulator_t *stp,uint8_t cw)
 {
 	stp->cw = cw;
+	switch(stp->id)
+	{
+		case STEPPER_LEFT:
+		{
+			if(stp->cw == CLOCKWISE)
+				STEPPER_LEFT_CLOCKWISE();
+			else
+				STEPPER_LEFT_COUNTER_CLOCKWISE();
+		}break;
+		case STEPPER_RIGHT:
+		{
+			if(stp->cw == CLOCKWISE)
+				STEPPER_RIGHT_CLOCKWISE();
+			else
+				STEPPER_RIGHT_COUNTER_CLOCKWISE();
+		}break;
+	}
 }
 
 void stepper_config(Stepper_Regulator_t *stp,uint8_t cw,uint16_t rpm)
@@ -142,12 +194,14 @@ void stepper_start(Stepper_Regulator_t *stp)
 {
 	HAL_TIM_PWM_Start(&htim2,stp->channel);
 	stp->enable = 1;
+	stepper_enable(stp);
 }
 
 void stepper_stop(Stepper_Regulator_t *stp)
 {
 	HAL_TIM_PWM_Stop(&htim2,stp->channel);
 	stp->enable = 0;
+	stepper_disable(stp);
 }
 
 void stepper_hold(Stepper_Regulator_t *stp)
@@ -175,20 +229,16 @@ void stepper_idle(Stepper_Regulator_t *stp)
 {
 }
 
-void stpper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
+void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
 {
 	if(stp->enable==0)
 	{
-		stepper_start(stp);
 		stepper_setDir(stp,cw);
-		stp->enable = 1;
-	}
-	if(stp->pulses*STEP_ANGLE >= degree)
-	{
-		stepper_stop(stp);
-		stp->enable = 0;
+		stp->pulses = degree/STEP_ANGLE;
+		stp->mode = MODE_SERVO;
 	}
 }
+
 
 void stepper_raise(Stepper_Regulator_t *stp,uint16_t mm)
 {
