@@ -92,9 +92,6 @@ void GetEncoderBias(volatile Encoder *v, CAN_RxHeaderTypeDef *rxHeader,uint8_t* 
 void EncoderProcess(volatile Encoder *v, uint8_t* msg);
 void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg);
 void setArmSpeed(int16_t iq);
-void GMShootControl(void);
-void set_Shoot_speed(int16_t shoot_iq);
-void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
