@@ -231,12 +231,10 @@ void stepper_idle(Stepper_Regulator_t *stp)
 
 void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
 {
-	if(stp->enable==0)
-	{
-		stepper_setDir(stp,cw);
-		stp->pulses = degree/STEP_ANGLE;
-		stp->mode = MODE_SERVO;
-	}
+	stepper_start(stp);
+	stepper_setDir(stp,cw);
+	stp->pulses = degree/STEP_ANGLE;
+	stp->mode = MODE_SERVO;
 }
 
 

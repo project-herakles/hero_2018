@@ -254,32 +254,21 @@ void TIM2_IRQHandler(void)
 	RED_LED_ON();
 	if(stepper_left.mode == MODE_SERVO)
 	{
-		// if mode switch happens, start rotating
-		if(stepper_left_lmode == MODE_MOTOR)
-		{
-			stepper_start(&stepper_left);
-		}
 		// if pulse counts to 0, stop the stepper
 		if(stepper_left.pulses-- ==0)
 		{
 			stepper_stop(&stepper_left);
+			stepper_left.pulses = 0;
 		}
 	}
 	
 	if(stepper_right.mode == MODE_SERVO)
 	{
-		if(stepper_left_lmode==MODE_MOTOR)
-		{
-			stepper_start(&stepper_left);
-		}
 		if(stepper_left.pulses-- ==0)
 		{
 			stepper_stop(&stepper_left);
 		}
 	}
-	// memorize last mode for reference
-	stepper_left_lmode = stepper_left.mode;
-	stepper_right_lmode = stepper_right.mode;
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
