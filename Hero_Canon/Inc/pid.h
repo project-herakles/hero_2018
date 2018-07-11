@@ -14,6 +14,9 @@ typedef struct PID_Regulator_t
 	float KpComponent;
 	float KiComponent;
 	float KdComponent;
+	float Ki_Limit;
+	float output_limit;
+	void (*Calc)(struct PID_Regulator_t *);
 }PID_Regulator_t;
 
 #define ARM_POSITION_PID_DEFAULT \
@@ -29,6 +32,9 @@ typedef struct PID_Regulator_t
 	0,\
 	0,\
 	0,\
+	0,\
+	0,\
+	&PID_Calc_Arm,\
 }\
 
 #define ARM_SPEED_PID_DEFAULT \
@@ -44,9 +50,69 @@ typedef struct PID_Regulator_t
 	0,\
 	0,\
 	0,\
+	0,\
+	0,\
+	&PID_Calc_Arm, \
 }\
 //Encoder bias = 2500
 #define ARM_ENCODER_DEFAULT \
+{\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	7486,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+}\
+
+#define YAW_ENCODER_DEFAULT \
+{\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	7486,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+}\
+
+#define PITCH_ENCODER_DEFAULT \
+{\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	7486,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+	0,\
+}\
+
+#define SHOOT_ENCODER_DEFAULT \
 {\
 	0,\
 	0,\
@@ -78,9 +144,13 @@ typedef struct PID_Regulator_t
 	0,\
 	0,\
 	0,\
+	0,\
+	0,\
+	&PID_Calc_Step,\
 }\
 
 
 void PID_Calc(PID_Regulator_t *pid);
+void PID_Calc_Step(PID_Regulator_t *pid);
 void PID_Calc_Arm(PID_Regulator_t *PID_Regulator);
 #endif

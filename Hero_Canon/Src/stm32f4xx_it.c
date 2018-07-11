@@ -44,12 +44,15 @@
 #include "remoteTask.h"
 #include "can.h"
 #include "dma.h"
+#include "stepper.h"
 extern uint8_t RemoteBuffer[18];
 extern uint8_t canRxMsg[8];
 extern uint8_t canTxMsg[8];
 extern CAN_TxHeaderTypeDef can1TxHeader0;
 extern CAN_TxHeaderTypeDef can1TxHeader1;
 extern CAN_RxHeaderTypeDef can1RxHeader;
+extern Stepper_Regulator_t stepper_left;
+extern Stepper_Regulator_t stepper_right;
 
 int16_t ch0;
 /* USER CODE END 0 */

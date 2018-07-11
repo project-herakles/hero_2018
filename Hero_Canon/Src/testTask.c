@@ -46,7 +46,6 @@ void Test_Task(void)
 			stepper_start(&stepper_left);
 			clockwise = CLOCKWISE;
 		}
-		
 	}
 	
 	//CAN_SendMsg(&hcan1,canTxMsg);

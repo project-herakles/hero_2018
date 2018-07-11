@@ -71,7 +71,7 @@ void remoteDataProcess(uint8_t* pData){
 
 void Remote_Control(Remote *rc)
 {
-	if(GetWorkState()!= STOP_STATE && GetWorkState()!= PREPARE_STATE)
+	if(getWorkState()!= STOP_STATE && getWorkState()!= PREPARE_STATE)
 	{
 		chassis_speed_ref.forward_back_ref = (rc->ch1 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET) * STICK_TO_CHASSIS_SPEED_REF_FACT;
     chassis_speed_ref.left_right_ref   = (rc->ch0 - (int16_t)REMOTE_CONTROLLER_STICK_OFFSET) * STICK_TO_CHASSIS_SPEED_REF_FACT; 
@@ -82,7 +82,7 @@ void MouseKey_Control(Mouse* mouse,Key* key)
 {
 	static int16_t forward_back_speed = 0;
 	static int16_t left_right_speed = 0;
-	if(GetWorkState()!=PREPARE_STATE && GetWorkState()!=STOP_STATE)
+	if(getWorkState()!=PREPARE_STATE && getWorkState()!=STOP_STATE)
 	{
 		if(key->v & 0x40) // key: shift
 		{

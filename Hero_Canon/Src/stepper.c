@@ -1,6 +1,7 @@
 #include "stepper.h"
 #include "tim.h"
 #include "gpio.h"
+#include "controlTask.h"
 
 Stepper_Regulator_t stepper_left = STEPPER_LEFT_REGULATOR_DEFAULT;
 Stepper_Regulator_t stepper_right = STEPPER_RIGHT_REGULATOR_DEFAULT;
@@ -69,8 +70,64 @@ void stepper_init(Stepper_Regulator_t * stp)
   HAL_TIM_MspPostInit(&htim2);
 }
 
-void stepper_setDir(Stepper_Regulator_t *stp)
+
+void stepper_apply(Stepper_Regulator_t * stp)
 {
+	// config direction
+	switch(stp->id)
+	{
+		case STEPPER_LEFT:
+		{
+			if(stp->cw == CLOCKWISE)
+				STEPPER_LEFT_CLOCKWISE();
+			else
+				STEPPER_LEFT_COUNTER_CLOCKWISE();
+		}break;
+		case STEPPER_RIGHT:
+		{
+			if(stp->cw == CLOCKWISE)
+				STEPPER_RIGHT_CLOCKWISE();
+			else
+				STEPPER_RIGHT_COUNTER_CLOCKWISE();
+		}break;
+	}
+	
+	TIM_MasterConfigTypeDef sMasterConfig;
+  TIM_OC_InitTypeDef sConfigOC;
+
+	// timer configuration
+  htim2.Instance = TIM2;
+  htim2.Init.Prescaler = 4200;
+  htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim2.Init.Period = stp->period;
+  htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  if (HAL_TIM_PWM_Init(&htim2) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+
+  sConfigOC.OCMode = TIM_OCMODE_PWM1;
+  sConfigOC.Pulse = stp->period/2;
+  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
+  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
+
+  if (HAL_TIM_PWM_ConfigChannel(&htim2, &sConfigOC, stp->channel) != HAL_OK)
+  {
+    _Error_Handler(__FILE__, __LINE__);
+  }
+  HAL_TIM_MspPostInit(&htim2);
+}
+
+void stepper_setDir(Stepper_Regulator_t *stp,uint8_t cw)
+{
+	stp->cw = cw;
 }
 
 void stepper_config(Stepper_Regulator_t *stp,uint8_t cw,uint16_t rpm)
@@ -118,8 +175,24 @@ void stepper_idle(Stepper_Regulator_t *stp)
 {
 }
 
+void stpper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
+{
+	if(stp->enable==0)
+	{
+		stepper_start(stp);
+		stepper_setDir(stp,cw);
+		stp->enable = 1;
+	}
+	if(stp->pulses*STEP_ANGLE >= degree)
+	{
+		stepper_stop(stp);
+		stp->enable = 0;
+	}
+}
+
 void stepper_raise(Stepper_Regulator_t *stp,uint16_t mm)
 {
+
 }
 
 void stepper_lower(Stepper_Regulator_t *stp, uint16_t mm)

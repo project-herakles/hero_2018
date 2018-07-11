@@ -27,6 +27,25 @@ void PID_Calc(PID_Regulator_t *pid)
 		(pid->output>0) ? (pid->output=pid->output_limit) : (pid->output = -pid->output_limit);
 }
 
+void PID_Calc_Arm(PID_Regulator_t *PID_Regulator)
+{
+	PID_Regulator->err[1] = PID_Regulator->err[0];
+	PID_Regulator->err[0] = (PID_Regulator->ref - PID_Regulator->fdb);
+
+		
+	PID_Regulator->KpComponent = PID_Regulator->kp * PID_Regulator->err[0];
+	PID_Regulator->KiComponent += PID_Regulator->ki *PID_Regulator->err[0];
+	PID_Regulator->KdComponent = PID_Regulator->kd * (PID_Regulator->err[0] - PID_Regulator->err[1]);
+	PID_Regulator->output = PID_Regulator->KpComponent + PID_Regulator->KiComponent+PID_Regulator->KdComponent;
+	
+	if(PID_Regulator->output - PID_Regulator->last_output > 8000)
+		PID_Regulator->output = PID_Regulator->last_output + 8000;
+	else if(PID_Regulator->output - PID_Regulator->last_output < -8000)
+		PID_Regulator->output = PID_Regulator->last_output - 8000;
+	
+	PID_Regulator->last_output = PID_Regulator->output;
+}
+
 void PID_Calc_Debug(PID_Regulator_t *pid,float kp,float ki,float kd)
 {
 	pid->err[1] = pid->err[0];

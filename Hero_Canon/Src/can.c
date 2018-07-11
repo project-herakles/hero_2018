@@ -57,7 +57,7 @@ volatile Encoder CM3Encoder;
 volatile Encoder CM4Encoder;
 volatile Encoder GMYawEncoder = YAW_ENCODER_DEFAULT;
 volatile Encoder GMPitchEncoder = PITCH_ENCODER_DEFAULT;
-volatile Encoder ArmEncoder;
+volatile Encoder ArmEncoder = ARM_ENCODER_DEFAULT;
 volatile Encoder ShootEncoder = SHOOT_ENCODER_DEFAULT;
 /* USER CODE END 0 */
 
@@ -241,7 +241,7 @@ void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg)
 						// 比较保存编码器的值和偏差值，如果编码器的值和初始偏差之间差距超过阈值，将偏差值做处理，防止出现云台反方向运动
 					// if(can_count>=90 && can_count<=100)
 					/*
-					if(GetWorkState() == PREPARE_STATE)   //准备阶段要求二者之间的差值一定不能大于阈值，否则肯定是出现了临界切换
+					if(getWorkState() == PREPARE_STATE)   //准备阶段要求二者之间的差值一定不能大于阈值，否则肯定是出现了临界切换
 					 {
 							 if((GMYawEncoder.ecd_bias - GMYawEncoder.ecd_value) <-4000)
 							 {

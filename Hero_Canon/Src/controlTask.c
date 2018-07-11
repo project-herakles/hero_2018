@@ -415,25 +415,13 @@ void Control_Loop(void)
 	if(time_tick_ms%1000==0)
 	{
 		RED_LED_TOGGLE();
-		/*
-		HAL_TIM_PWM_Stop(&htim2,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Stop(&htim2,TIM_CHANNEL_3);
-		configPWMchannel(&htim2,TIM_CHANNEL_1,waveLength);
-		configPWMchannel(&htim2,TIM_CHANNEL_3,60-waveLength);
-		HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
-		HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_3);
-		//waveLength++;
-		*/
 	}
 	time_tick_ms += 1;
-	//set_CM_speed(2000,2000,2000,2000);
+
 	workStateFSM();
 	CM_Control();
-	
-	//CollectModeSwitch();
-	//Collect_Control(&collectMode);
+
 	Collect_Control();
 	CollectClawControl();
-	//Rescue_Control();
-	//setArmSpeed(-5000);
+
 }
