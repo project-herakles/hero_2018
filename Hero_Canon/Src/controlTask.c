@@ -17,7 +17,6 @@ uint32_t time_tick_ms = 0;
 uint32_t start_time_tick_ms = 0; //to record the current time for timeout in collectModeSwitch()
 uint8_t countdown = 0; //used for timeout in collectModeSwitch()
 uint8_t collect_flag = 0; //set it to 1 to go into collect Mode, only return to 0 when collect is finished
-uint8_t error_flag = 0; 
 uint8_t rescue_flag = 0;
 uint8_t collect_mode_code = 0;
 uint8_t claw_in_place = 0;//Variable for human supervision, change by clicking
@@ -55,28 +54,28 @@ void workStateFSM(void)
 	switch(workState)
 	{
 		case PREPARE_STATE:
-			if(getInputMode() == STOP_MODE || error_flag == 1)
+			if(getInputMode() == STOP_MODE)
 				setWorkState(STOP_STATE);
 			else if(time_tick_ms > PREPARE_TIME_TICK_MS)
 				setWorkState(NORMAL_STATE);
 			break;
 			
 		case NORMAL_STATE:
-			if (getInputMode() == STOP_MODE || error_flag == 1)
+			if (getInputMode() == STOP_MODE)
 				setWorkState(STOP_STATE);
 			else if(collect_flag == 1)
 				setWorkState(COLLECT_STATE);
 			break;
 			
 		case COLLECT_STATE:
-			if(getInputMode() == STOP_MODE || error_flag == 1)
+			if(getInputMode() == STOP_MODE)
 				setWorkState(STOP_STATE);
 			else if(collect_flag == 0)
 				setWorkState(NORMAL_STATE);
 			break;
 			
 		case STOP_STATE:
-			if(getInputMode() != STOP_MODE && error_flag == 0)
+			if(getInputMode() != STOP_MODE)
 				setWorkState(PREPARE_STATE);
 			break;
 		default:;	

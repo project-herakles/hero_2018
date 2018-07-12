@@ -12,14 +12,12 @@ extern Stepper_Regulator_t stepper_left;
 extern Stepper_Regulator_t stepper_right;
 extern uint32_t time_tick_ms;
 
-static uint8_t clockwise = 1;
-
 void Test_Task_Init(void)
 {
 	stepper_init(&stepper_left);
 	stepper_init(&stepper_right);
 	RED_LED_ON();
-	stepper_rotate(&stepper_left,CLOCKWISE,720);
+	//stepper_rotate(&stepper_left,CLOCKWISE,720);
 }
 
 void Test_Task(void)

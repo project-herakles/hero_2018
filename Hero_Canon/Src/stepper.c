@@ -227,6 +227,7 @@ void stepper_hold(Stepper_Regulator_t *stp)
 
 void stepper_idle(Stepper_Regulator_t *stp)
 {
+	stepper_enable(stp);
 }
 
 void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
@@ -237,16 +238,3 @@ void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
 	stp->mode = MODE_SERVO;
 }
 
-
-void stepper_raise(Stepper_Regulator_t *stp,uint16_t mm)
-{
-
-}
-
-void stepper_lower(Stepper_Regulator_t *stp, uint16_t mm)
-{
-}
-
-void stepper_setHeight(Stepper_Regulator_t *stpr, uint16_t mm)
-{
-}
