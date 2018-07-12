@@ -418,7 +418,7 @@ void Control_Loop(void)
 	time_tick_ms += 1;
 
 	workStateFSM();
-	CM_Control();
+	//CM_Control();
 
 	Collect_Control();
 	CollectClawControl();

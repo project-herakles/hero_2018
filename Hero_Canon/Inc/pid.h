@@ -138,14 +138,14 @@ typedef struct PID_Regulator_t
 	{0,0},\
 	0,\
 	0,\
-	1.0f,\
+	220.0f,\
 	0.0f,\
 	0.0f,\
 	0,\
 	0,\
 	0,\
 	0,\
-	0,\
+	5000,\
 	&PID_Calc_Step,\
 }\
 
