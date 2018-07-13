@@ -5,6 +5,8 @@
 #include "tim.h"
 #include "pid.h"
 #include "math.h"
+#include "imu_task.h"
+#include "math.h"
 
 #define ARM_Angle_to_Encoder 77116.0f/180.0f
 #define RESCUE_CLAW_ENABLE() HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_SET)
@@ -43,6 +45,10 @@ extern volatile Encoder CM4Encoder;
 extern Chassis_speed_ref_t chassis_speed_ref;
 extern RC_Ctrl_t RC_CtrlData;
 extern Gimbal_Ref_t Gimbal_Ref;
+extern imu_attitude_t atti;
+extern imu_data_t imu;
+float yaw_offset = 0;
+float yaw_speed = 0;
 
 uint32_t getCurrentTimeTick(void)
 {
@@ -424,7 +430,6 @@ void Gimbal_Control(void)
 	{
 		case PREPARE_STATE: // Init state (Yaw,Pitch) = (0,0)
 		{
-			
 			GMYPositionPID.ref = 0;
 			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
 			//fuzzy test
@@ -443,12 +448,14 @@ void Gimbal_Control(void)
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
 			PID_Calc_Debug(&GMPSpeedPID,50.0,0.0,0.0);
 			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+			
+			yaw_offset = atti.yaw;
 		}break;
 		case NORMAL_STATE:
 		{
 			GMYPositionPID.ref = 0;
-			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
-			PID_Calc_Debug(&GMYPositionPID,1,0,0);
+			GMYPositionPID.fdb = atti.yaw - yaw_offset;
+			//PID_Calc_Debug(&GMYPositionPID,1,0,0);
 			/*
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
 				PID_Calc_Debug(&GMYPositionPID,0.0,0.000,0);
@@ -460,6 +467,8 @@ void Gimbal_Control(void)
 			GMYSpeedPID.ref = GMYPositionPID.output;
 			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
 			PID_Calc_Debug(&GMYSpeedPID,100,0.0,0);
+			
+			yaw_speed = imu.wy * 180.0f/PI; // radian to degree
 			
 			GMPPositionPID.ref = Gimbal_Ref.pitch_angle_dynamic_ref;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;

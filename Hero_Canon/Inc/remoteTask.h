@@ -71,6 +71,8 @@ typedef struct
 #define STICK_TO_PITCH_ANGLE_INC_FACT       0.004f
 #define STICK_TO_YAW_ANGLE_INC_FACT         0.004f
 
+#define PI 3.14159265358979323846
+
 #define VAL_LIMIT(val, min, max)\
 if(val<=min)\
 {\
