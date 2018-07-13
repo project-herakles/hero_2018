@@ -463,7 +463,7 @@ void Gimbal_Control(void)
 			
 			GMPPositionPID.ref = Gimbal_Ref.pitch_angle_dynamic_ref;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;
-			//PID_Calc_Debug(&GMPPositionPID,0.4,0.001,0);
+			PID_Calc_Debug(&GMPPositionPID,0.4,0.001,0);
 			
 			if(fabs(GMPPositionPID.ref-GMPPositionPID.fdb)<5.0f)
 				PID_Calc_Debug(&GMPPositionPID,1,0.001,0);
