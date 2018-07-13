@@ -48,8 +48,10 @@ extern Gimbal_Ref_t Gimbal_Ref;
 extern uint8_t imu_cali_flag;
 extern imu_attitude_t atti;
 extern imu_data_t imu;
+extern mpu_data_t mpu_data;
 float yaw_offset = 0;
 float yaw_speed = 0;
+float yaw_speed_offset = 0;
 
 uint32_t getCurrentTimeTick(void)
 {
@@ -441,7 +443,7 @@ void Gimbal_Control(void)
 			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
 			//fuzzy test
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,1,0.001,0);
+				PID_Calc_Debug(&GMYPositionPID,0.8,0.001,0);
 			else
 				PID_Calc_Debug(&GMYPositionPID,0.5,0.00,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			GMYSpeedPID.ref = GMYPositionPID.output;
@@ -457,25 +459,28 @@ void Gimbal_Control(void)
 			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
 			
 			yaw_offset = atti.yaw;
+			yaw_speed_offset = imu.wy * 180.0f/PI; // radian to degree
 		}break;
 		case NORMAL_STATE:
 		{
+			yaw_speed = mpu_data.gz / 16.384f;
+			
 			GMYPositionPID.ref = 0;
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
-			//PID_Calc_Debug(&GMYPositionPID,1,0,0);
-			/*
+			//PID_Calc_Debug(&GMYPositionPID,1.5,0,5);
+			
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,0.0,0.000,0);
+				PID_Calc_Debug(&GMYPositionPID,2.0,0.0001,0);
 			else
-				PID_Calc_Debug(&GMYPositionPID,0.0,0.0,0.0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
-			*/
+				PID_Calc_Debug(&GMYPositionPID,1.0,0.0,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+			
 			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
 			
 			GMYSpeedPID.ref = GMYPositionPID.output;
-			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
-			PID_Calc_Debug(&GMYSpeedPID,100,0.0,0);
+			GMYSpeedPID.fdb = yaw_speed;
+			PID_Calc_Debug(&GMYSpeedPID,3,0.0,0);
 			
-			yaw_speed = imu.wy * 180.0f/PI; // radian to degree
+			//yaw_speed = imu.wy * 180.0f/PI - yaw_speed_offset; // radian to degree
 			
 			GMPPositionPID.ref = Gimbal_Ref.pitch_angle_dynamic_ref;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;
