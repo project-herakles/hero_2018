@@ -43,6 +43,7 @@ extern volatile Encoder CM4Encoder;
 extern Chassis_speed_ref_t chassis_speed_ref;
 extern RC_Ctrl_t RC_CtrlData;
 extern Gimbal_Ref_t Gimbal_Ref;
+extern uint8_t imu_cali_flag;
 
 uint32_t getCurrentTimeTick(void)
 {
@@ -62,6 +63,11 @@ void workStateFSM(void)
 {
 	switch(workState)
 	{
+		case WAKE_STATE:
+			if(getInputMode() == STOP_MODE)
+				setWorkState(STOP_STATE);
+			else if(imu_cali_flag==1)
+				setWorkState(PREPARE_STATE);
 		case PREPARE_STATE:
 			if(getInputMode() == STOP_MODE)
 				setWorkState(STOP_STATE);
