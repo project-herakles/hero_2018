@@ -37,8 +37,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __dma_hku_H
-#define __dma_hku_H
+#ifndef __dma_H
+#define __dma_H
 
 #ifdef __cplusplus
  extern "C" {

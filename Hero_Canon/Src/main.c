@@ -44,11 +44,11 @@
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "imu_task.h"
 
 /* USER CODE BEGIN Includes */
 #include "testTask.h"
 #include "controlTask.h"
+#include "imu_task.h"
 extern uint8_t RemoteBuffer[8];
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern uint8_t collect_mode_code;
@@ -108,6 +108,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_CAN1_Init();
   MX_SPI5_Init();
+  MX_TIM3_Init();
   /* USER CODE BEGIN 2 */
 	RED_LED_OFF();
 	GREEN_LED_OFF();
