@@ -45,6 +45,7 @@
 static uint8_t tx, rx;
 static uint8_t tx_buff[14];
 static uint8_t mpu_buff[14];
+uint8_t imu_cali_flag = 0;
 
 uint8_t mpu_write_reg(uint8_t const reg, uint8_t const data)
 {
@@ -288,5 +289,7 @@ void mpu_offset_cal(void)
   mpu_data.gx_offset=mpu_data.gx_offset / 300;
   mpu_data.gy_offset=mpu_data.gx_offset / 300;
   mpu_data.gz_offset=mpu_data.gz_offset / 300;
+	
+	imu_cali_flag = 1;
 }
 

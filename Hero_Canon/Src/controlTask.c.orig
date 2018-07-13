@@ -45,11 +45,14 @@ extern volatile Encoder CM4Encoder;
 extern Chassis_speed_ref_t chassis_speed_ref;
 extern RC_Ctrl_t RC_CtrlData;
 extern Gimbal_Ref_t Gimbal_Ref;
-extern uint8_t imu_cali_flag;
+<<<<<<< HEAD
 extern imu_attitude_t atti;
 extern imu_data_t imu;
 float yaw_offset = 0;
 float yaw_speed = 0;
+=======
+extern uint8_t imu_cali_flag;
+>>>>>>> master
 
 uint32_t getCurrentTimeTick(void)
 {
@@ -436,7 +439,6 @@ void Gimbal_Control(void)
 	{
 		case PREPARE_STATE: // Init state (Yaw,Pitch) = (0,0)
 		{
-			
 			GMYPositionPID.ref = 0;
 			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
 			//fuzzy test

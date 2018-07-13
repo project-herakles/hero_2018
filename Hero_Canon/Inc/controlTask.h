@@ -3,6 +3,7 @@
 #include "stm32f4xx.h"
 typedef enum
 {
+	WAKE_STATE,
 	PREPARE_STATE,
 	NORMAL_STATE,
 	COLLECT_STATE,
