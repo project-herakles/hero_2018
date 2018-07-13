@@ -49,6 +49,15 @@
 
 /* Private define ------------------------------------------------------------*/
 
+#define IST_SET_PIN_Pin GPIO_PIN_2
+#define IST_SET_PIN_GPIO_Port GPIOE
+#define MPU_INT_Pin GPIO_PIN_1
+#define MPU_INT_GPIO_Port GPIOE
+#define IMU_TEMP_Pin GPIO_PIN_5
+#define IMU_TEMP_GPIO_Port GPIOB
+#define SPI5_NSS_Pin GPIO_PIN_6
+#define SPI5_NSS_GPIO_Port GPIOF
+
 /* ########################## Assert Selection ############################## */
 /**
   * @brief Uncomment the line below to expanse the "assert_param" macro in the 
