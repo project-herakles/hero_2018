@@ -50,6 +50,15 @@ typedef __packed struct
 	int16_t rotate_ref;
 }Chassis_speed_ref_t;
 
+typedef struct
+{
+    float pitch_angle_dynamic_ref;
+    float yaw_angle_dynamic_ref;
+    float pitch_angle_static_ref;
+    float yaw_angle_static_ref;
+    float pitch_speed_ref;
+    float yaw_speed_ref;
+}Gimbal_Ref_t;
 
 
 #define REMOTE_CONTROLLER_STICK_OFFSET (1024)
@@ -59,6 +68,8 @@ typedef __packed struct
 #define NORMAL_LEFT_RIGHT_SPEED   			180
 #define HIGH_FORWARD_BACK_SPEED 			250
 #define HIGH_LEFT_RIGHT_SPEED   			300
+#define STICK_TO_PITCH_ANGLE_INC_FACT       0.004f
+#define STICK_TO_YAW_ANGLE_INC_FACT         0.004f
 
 #define VAL_LIMIT(val, min, max)\
 if(val<=min)\

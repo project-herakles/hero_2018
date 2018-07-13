@@ -42,6 +42,8 @@ extern volatile Encoder CM3Encoder;
 extern volatile Encoder CM4Encoder;
 extern Chassis_speed_ref_t chassis_speed_ref;
 extern RC_Ctrl_t RC_CtrlData;
+extern Gimbal_Ref_t Gimbal_Ref;
+
 uint32_t getCurrentTimeTick(void)
 {
 	return time_tick_ms;
@@ -427,9 +429,9 @@ void Gimbal_Control(void)
 			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
 			//fuzzy test
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,0,0.000,0);
+				PID_Calc_Debug(&GMYPositionPID,1,0.001,0);
 			else
-				PID_Calc_Debug(&GMYPositionPID,0,0.000,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+				PID_Calc_Debug(&GMYPositionPID,0.5,0.00,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			GMYSpeedPID.ref = GMYPositionPID.output;
 			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
 			PID_Calc_Debug(&GMYSpeedPID,50,0,0);
@@ -459,21 +461,20 @@ void Gimbal_Control(void)
 			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
 			PID_Calc_Debug(&GMYSpeedPID,100,0.0,0);
 			
-			GMPPositionPID.ref = 0;
+			GMPPositionPID.ref = Gimbal_Ref.pitch_angle_dynamic_ref;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;
-			PID_Calc_Debug(&GMPPositionPID,0,0.0,0);
-			/*
-			if(fabs(GMPPositionPID.ref-GMPPositionPID.fdb)<3.0f)
-				PID_Calc_Debug(&GMPPositionPID,0.1,0.000,0);
+			//PID_Calc_Debug(&GMPPositionPID,0.4,0.001,0);
+			
+			if(fabs(GMPPositionPID.ref-GMPPositionPID.fdb)<5.0f)
+				PID_Calc_Debug(&GMPPositionPID,1,0.001,0);
 			else
-				PID_Calc_Debug(&GMPPositionPID,0.1,0.0,0.0);
-			*/
+				PID_Calc_Debug(&GMPPositionPID,0.6,0.0001,5);
+			
 			GMPSpeedPID.ref = GMPPositionPID.output;
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
 			PID_Calc_Debug(&GMPSpeedPID,100,0.0,0.0);
 			
 			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
-			//set_GM_speed(2000,0);
 		}break;
 		default:
 		{
@@ -493,11 +494,12 @@ void Control_Loop(void)
 	workStateFSM();
 	Gimbal_Control();
 	GMShootControl();
-	/*
+	
 	if(time_tick_ms%4==0)
 	{
 		CM_Control();
 	}
+	/*
 	Collect_Control();
 	CollectClawControl();
 	*/

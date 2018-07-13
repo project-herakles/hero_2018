@@ -96,7 +96,7 @@ void PID_Smart(PID_Regulator_t *pid, float impluse);
 	0.002f,\
 	0.0f,\
 	0,\
-	0,\
+	9,\
 	0,\
 	5000,\
 	5,\
@@ -215,7 +215,7 @@ void PID_Smart(PID_Regulator_t *pid, float impluse);
 	9,\
 	0,\
 	5000,\
-	5,\
+	12,\
 	0,\
 	&PID_Calc_Windup,\
 	&PID_Reset,\
