@@ -78,6 +78,8 @@ typedef struct{
 #define CAN_BUS2_MOTOR4_FEEDBACK_MSG_ID           0x204
 #define CAN_BUS2_MOTOR5_FEEDBACK_MSG_ID           0x205
 #define CAN_BUS2_MOTOR6_FEEDBACK_MSG_ID           0x206
+#define CAN_BUS2_MOTOR7_FEEDBACK_MSG_ID 					0x207
+#define CAN_BUS2_MOTOR8_FEEDBACK_MSG_ID 					0x208
 /* USER CODE END Private defines */
 
 extern void _Error_Handler(char *, int);
@@ -92,6 +94,9 @@ void GetEncoderBias(volatile Encoder *v, CAN_RxHeaderTypeDef *rxHeader,uint8_t* 
 void EncoderProcess(volatile Encoder *v, uint8_t* msg);
 void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg);
 void setArmSpeed(int16_t iq);
+void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq);
+void set_Shoot_speed(int16_t shoot_iq);
+void GMShootControl(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

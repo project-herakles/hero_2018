@@ -47,7 +47,8 @@
 #include "stepper.h"
 extern uint8_t RemoteBuffer[18];
 extern uint8_t canRxMsg[8];
-extern uint8_t canTxMsg[8];
+extern uint8_t canTxMsg0[8];
+extern uint8_t canTxMsg1[8];
 uint8_t stepper_left_lmode;
 uint8_t stepper_right_lmode;
 extern CAN_TxHeaderTypeDef can1TxHeader0;

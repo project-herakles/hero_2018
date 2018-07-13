@@ -5,7 +5,7 @@
 #include "main.h"
 #include "stepper.h"
 
-extern uint8_t canTxMsg[8];
+extern uint8_t canTxMsg0[8];
 extern UART_HandleTypeDef huart1;
 extern uint8_t RemoteBuffer[18];
 extern Stepper_Regulator_t stepper_left;

@@ -4,6 +4,7 @@
 #include "gpio.h"
 #include "tim.h"
 #include "pid.h"
+#include "math.h"
 
 #define ARM_Angle_to_Encoder 77116.0f/180.0f
 #define RESCUE_CLAW_ENABLE() HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_SET)
@@ -20,15 +21,21 @@ uint8_t collect_flag = 0; //set it to 1 to go into collect Mode, only return to 
 uint8_t rescue_flag = 0;
 uint8_t collect_mode_code = 0;
 uint8_t claw_in_place = 0;//Variable for human supervision, change by clicking
-uint8_t waveLength = 50;
+uint8_t waveLength = 50; 
 PID_Regulator_t CM1SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t CM2SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t CM3SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t CM4SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
+PID_Regulator_t GMYPositionPID = YAW_POSITION_PID_DEFAULT;
+PID_Regulator_t GMPPositionPID = PITCH_POSITION_PID_DEFAULT;
+PID_Regulator_t GMYSpeedPID = YAW_SPEED_PID_DEFAULT;
+PID_Regulator_t GMPSpeedPID = PITCH_SPEED_PID_DEFAULT;
 PID_Regulator_t ArmPositionPID = ARM_POSITION_PID_DEFAULT;
 PID_Regulator_t ArmSpeedPID = ARM_SPEED_PID_DEFAULT;
 
 extern volatile Encoder ArmEncoder;
+extern volatile Encoder GMYawEncoder;
+extern volatile Encoder GMPitchEncoder;
 extern volatile Encoder CM1Encoder;
 extern volatile Encoder CM2Encoder;
 extern volatile Encoder CM3Encoder;
@@ -113,7 +120,7 @@ void CM_Control(void)
 	else
 	{
 		//set_CM_speed(CM1SpeedPID.ref*SPEED_OUTPUT_ATTENUATION,CM2SpeedPID.ref*SPEED_OUTPUT_ATTENUATION,CM3SpeedPID.ref*SPEED_OUTPUT_ATTENUATION,CM4SpeedPID.ref*SPEED_OUTPUT_ATTENUATION);
-		set_CM_speed(-CM1SpeedPID.output*SPEED_OUTPUT_ATTENUATION,-CM2SpeedPID.output*SPEED_OUTPUT_ATTENUATION,-CM3SpeedPID.output*SPEED_OUTPUT_ATTENUATION,-CM4SpeedPID.output*SPEED_OUTPUT_ATTENUATION);
+		set_CM_speed(CM1SpeedPID.output*SPEED_OUTPUT_ATTENUATION,CM2SpeedPID.output*SPEED_OUTPUT_ATTENUATION,CM3SpeedPID.output*SPEED_OUTPUT_ATTENUATION,CM4SpeedPID.output*SPEED_OUTPUT_ATTENUATION);
 	}
 }
 
@@ -408,6 +415,72 @@ void CollectClawControl(void)
 		RESCUE_CLAW_DISABLE();
 }
 
+void Gimbal_Control(void)
+{
+	//RED_LED_ON();
+	switch(workState)
+	{
+		case PREPARE_STATE: // Init state (Yaw,Pitch) = (0,0)
+		{
+			
+			GMYPositionPID.ref = 0;
+			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
+			//fuzzy test
+			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
+				PID_Calc_Debug(&GMYPositionPID,0,0.000,0);
+			else
+				PID_Calc_Debug(&GMYPositionPID,0,0.000,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+			GMYSpeedPID.ref = GMYPositionPID.output;
+			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
+			PID_Calc_Debug(&GMYSpeedPID,50,0,0);
+			
+			GMPPositionPID.ref = 0;
+			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;			
+			PID_Calc_Debug(&GMPPositionPID,0.0,0.000,0);
+			GMPSpeedPID.ref = GMPPositionPID.output;
+			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
+			PID_Calc_Debug(&GMPSpeedPID,50.0,0.0,0.0);
+			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+		}break;
+		case NORMAL_STATE:
+		{
+			GMYPositionPID.ref = 0;
+			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
+			PID_Calc_Debug(&GMYPositionPID,1,0,0);
+			/*
+			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
+				PID_Calc_Debug(&GMYPositionPID,0.0,0.000,0);
+			else
+				PID_Calc_Debug(&GMYPositionPID,0.0,0.0,0.0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+			*/
+			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
+			
+			GMYSpeedPID.ref = GMYPositionPID.output;
+			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
+			PID_Calc_Debug(&GMYSpeedPID,100,0.0,0);
+			
+			GMPPositionPID.ref = 0;
+			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;
+			PID_Calc_Debug(&GMPPositionPID,0,0.0,0);
+			/*
+			if(fabs(GMPPositionPID.ref-GMPPositionPID.fdb)<3.0f)
+				PID_Calc_Debug(&GMPPositionPID,0.1,0.000,0);
+			else
+				PID_Calc_Debug(&GMPPositionPID,0.1,0.0,0.0);
+			*/
+			GMPSpeedPID.ref = GMPPositionPID.output;
+			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
+			PID_Calc_Debug(&GMPSpeedPID,100,0.0,0.0);
+			
+			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+			//set_GM_speed(2000,0);
+		}break;
+		default:
+		{
+			set_GM_speed(0,0);
+		}
+	}
+}
 
 void Control_Loop(void)
 {
@@ -418,9 +491,14 @@ void Control_Loop(void)
 	time_tick_ms += 1;
 
 	workStateFSM();
-	//CM_Control();
-
+	Gimbal_Control();
+	GMShootControl();
+	/*
+	if(time_tick_ms%4==0)
+	{
+		CM_Control();
+	}
 	Collect_Control();
 	CollectClawControl();
-
+	*/
 }

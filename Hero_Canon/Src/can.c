@@ -44,12 +44,14 @@
 
 /* USER CODE BEGIN 0 */
 #include "pid.h"
+#include "controlTask.h"
 CAN_TxHeaderTypeDef can1TxHeader0;
 CAN_TxHeaderTypeDef can1TxHeader1;
 CAN_RxHeaderTypeDef can1RxHeader;
 
 CAN_FilterTypeDef can1Filter;
-uint8_t canTxMsg[8] = {0};
+uint8_t canTxMsg0[8] = {0};
+uint8_t canTxMsg1[8] = {0};
 uint32_t can_count=0;
 volatile Encoder CM1Encoder;
 volatile Encoder CM2Encoder;
@@ -192,15 +194,15 @@ void CAN_SendMsg(CAN_HandleTypeDef* hcan,CAN_TxHeaderTypeDef *canTxHeader,uint8_
 
 void set_CM_speed(int16_t cm1_iq,int16_t cm2_iq,int16_t cm3_iq,int16_t cm4_iq)
 {
-    canTxMsg[0] = (uint8_t)(cm1_iq >> 8);
-    canTxMsg[1] = (uint8_t)cm1_iq;
-    canTxMsg[2] = (uint8_t)(cm2_iq >> 8);
-    canTxMsg[3] = (uint8_t)cm2_iq;
-    canTxMsg[4] = (uint8_t)(cm3_iq >> 8);
-    canTxMsg[5] = (uint8_t)cm3_iq;
-    canTxMsg[6] = (uint8_t)(cm4_iq >> 8);
-    canTxMsg[7] = (uint8_t)cm4_iq;
-    CAN_SendMsg(&hcan1,&can1TxHeader0,canTxMsg);
+    canTxMsg0[0] = (uint8_t)(cm1_iq >> 8);
+    canTxMsg0[1] = (uint8_t)cm1_iq;
+    canTxMsg0[2] = (uint8_t)(cm2_iq >> 8);
+    canTxMsg0[3] = (uint8_t)cm2_iq;
+    canTxMsg0[4] = (uint8_t)(cm3_iq >> 8);
+    canTxMsg0[5] = (uint8_t)cm3_iq;
+    canTxMsg0[6] = (uint8_t)(cm4_iq >> 8);
+    canTxMsg0[7] = (uint8_t)cm4_iq;
+    CAN_SendMsg(&hcan1,&can1TxHeader0,canTxMsg0);
 }
 void GetEncoderBias(volatile Encoder *v,CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg)
 {
@@ -228,20 +230,20 @@ void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg)
 				}break;
 				case CAN_BUS2_MOTOR3_FEEDBACK_MSG_ID:
 				{
-					(can_count<=50) ? GetEncoderBias(&CM3Encoder ,rxHeader,msg):EncoderProcess(&CM3Encoder ,msg);   
+					(can_count<=50) ? GetEncoderBias(&CM3Encoder ,rxHeader,msg):EncoderProcess(&CM3Encoder ,msg);
 				}break;
 				case CAN_BUS2_MOTOR4_FEEDBACK_MSG_ID:
 				{
-				 	(can_count<=50) ? GetEncoderBias(&CM4Encoder ,rxHeader,msg):EncoderProcess(&CM4Encoder ,msg);
+					(can_count<=50) ? GetEncoderBias(&CM4Encoder ,rxHeader,msg):EncoderProcess(&CM4Encoder ,msg);
 				}break;
 				case CAN_BUS2_MOTOR5_FEEDBACK_MSG_ID:
 				{
 					 //GMYawEncoder.ecd_bias = yaw_ecd_bias;
-					 EncoderProcess(&ArmEncoder ,msg);    
+					 EncoderProcess(&GMYawEncoder ,msg);    
 						// 比较保存编码器的值和偏差值，如果编码器的值和初始偏差之间差距超过阈值，将偏差值做处理，防止出现云台反方向运动
 					// if(can_count>=90 && can_count<=100)
 					/*
-					if(getWorkState() == PREPARE_STATE)   //准备阶段要求二者之间的差值一定不能大于阈值，否则肯定是出现了临界切换
+					if(GetWorkState() == PREPARE_STATE)   //准备阶段要求二者之间的差值一定不能大于阈值，否则肯定是出现了临界切换
 					 {
 							 if((GMYawEncoder.ecd_bias - GMYawEncoder.ecd_value) <-4000)
 							 {
@@ -254,34 +256,33 @@ void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg)
 					 }
 					*/
 				}break;
-				/*
+				
 				case CAN_BUS2_MOTOR6_FEEDBACK_MSG_ID:
 				{
-					LostCounterFeed(GetLostCounter(LOST_COUNTER_INDEX_MOTOR6));
-						//GMPitchEncoder.ecd_bias = pitch_ecd_bias;
 						EncoderProcess(&GMPitchEncoder ,msg);
 						//码盘中间值设定也需要修改
-						 if(can_count<=100)
-						 {
-							 if((GMPitchEncoder.ecd_bias - GMPitchEncoder.ecd_value) <-4000)
-							 {
-								 GMPitchEncoder.ecd_bias = gAppParamStruct.GimbalCaliData.GimbalPitchOffset + 8192;
-							 }
-							 else if((GMPitchEncoder.ecd_bias - GMPitchEncoder.ecd_value) > 4000)
-							 {
-								 GMPitchEncoder.ecd_bias = gAppParamStruct.GimbalCaliData.GimbalPitchOffset - 8192;
-							 }
-						 }
-				}break;				
+						
+				}break;		
+					/*
 				case CAN_BUS1_ZGYRO_FEEDBACK_MSG_ID:
 				{
 					LostCounterFeed(GetLostCounter(LOST_COUNTER_INDEX_ZGYRO));
 					ZGyroModuleAngle = -0.01f*((int32_t)(msg->Data[0]<<24)|(int32_t)(msg->Data[1]<<16) | (int32_t)(msg->Data[2]<<8) | (int32_t)(msg->Data[3])); 
 				}break;
-				*/
+				
 				default:
 				{
 				}
+				*/
+				case CAN_BUS2_MOTOR7_FEEDBACK_MSG_ID:
+				{
+					EncoderProcess(&ArmEncoder,msg);
+				}break;
+				case CAN_BUS2_MOTOR8_FEEDBACK_MSG_ID:
+				{
+					EncoderProcess(&ShootEncoder, msg);
+				}break;
+				
 		}
 		// check if deadlock, meeans the yaw angle is overflow //time should keep for a long time to avoid bug		
 
@@ -294,6 +295,10 @@ void EncoderProcess(volatile Encoder *v, uint8_t* msg)
 	v->last_raw_value = v->raw_value;
 	v->raw_value = (msg[0]<<8)|msg[1];
 	v->diff = v->raw_value - v->last_raw_value;
+	if(can_count < 50)
+	{
+		v->diff = 0;
+	}
 	if(v->diff < -7000)    //两次编码器的反馈值差别太大，表示圈数发生了改变
 	{
 		v->round_cnt++;
@@ -328,30 +333,30 @@ void EncoderProcess(volatile Encoder *v, uint8_t* msg)
 
 void setArmSpeed(int16_t iq)
 {
-	canTxMsg[0] = (unsigned char)(iq >> 8);
-	canTxMsg[1] = (unsigned char) iq;
-	canTxMsg[2] = 0;
-	canTxMsg[3] = 0;
-	canTxMsg[4] = 0;
-	canTxMsg[5] = 0;
-	canTxMsg[6] = 0;
-	canTxMsg[7] = 0;
-	CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg);
+	canTxMsg0[0] = (unsigned char)(iq >> 8);
+	canTxMsg0[1] = (unsigned char) iq;
+	canTxMsg0[2] = 0;
+	canTxMsg0[3] = 0;
+	canTxMsg0[4] = 0;
+	canTxMsg0[5] = 0;
+	canTxMsg0[6] = 0;
+	canTxMsg0[7] = 0;
+	CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg0);
 }
 
 void GMShootControl()
 {
-	CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg);
+	CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg1);
 }
 
 void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq)
 {
-	canTxMsg[0] = (unsigned char)(yaw_iq >> 8);
-	canTxMsg[1] = (unsigned char) yaw_iq;
-	canTxMsg[2] = (unsigned char)(pitch_iq >> 8);
-	canTxMsg[3] = (unsigned char) pitch_iq;
-	canTxMsg[4] = 0;
-	canTxMsg[5] = 0;
+	canTxMsg1[0] = (unsigned char)(yaw_iq >> 8);
+	canTxMsg1[1] = (unsigned char) yaw_iq;
+	canTxMsg1[2] = (unsigned char)(pitch_iq >> 8);
+	canTxMsg1[3] = (unsigned char) pitch_iq;
+	canTxMsg1[4] = 0;
+	canTxMsg1[5] = 0;
 	//canTxMsg[6] = (unsigned char) (2000 >> 8);
 	//canTxMsg[7] = (unsigned char) 2000; //for M2006 testing
 	
@@ -361,8 +366,8 @@ void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq)
 
 void set_Shoot_speed(int16_t shoot_iq)
 {
-	canTxMsg[6] = (unsigned char) (shoot_iq >> 8);
-	canTxMsg[7] = (unsigned char) shoot_iq;
+	canTxMsg1[6] = (unsigned char) (shoot_iq >> 8);
+	canTxMsg1[7] = (unsigned char) shoot_iq;
 }
 
 /* USER CODE END 1 */

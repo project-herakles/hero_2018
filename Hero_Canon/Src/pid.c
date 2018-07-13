@@ -1,9 +1,11 @@
 #include "pid.h"
 #include "stm32f4xx.h"
 #include "math.h"
+#include "controlTask.h"
 
 static float pitch_output = 0;
 static float yaw_output = 0;
+Smart_PID_t sPID;
 
 void PID_Reset(PID_Regulator_t *pid)
 {
@@ -25,25 +27,6 @@ void PID_Calc(PID_Regulator_t *pid)
 	//output value limit
 	if(fabs(pid->output) > pid->output_limit)
 		(pid->output>0) ? (pid->output=pid->output_limit) : (pid->output = -pid->output_limit);
-}
-
-void PID_Calc_Arm(PID_Regulator_t *PID_Regulator)
-{
-	PID_Regulator->err[1] = PID_Regulator->err[0];
-	PID_Regulator->err[0] = (PID_Regulator->ref - PID_Regulator->fdb);
-
-		
-	PID_Regulator->KpComponent = PID_Regulator->kp * PID_Regulator->err[0];
-	PID_Regulator->KiComponent += PID_Regulator->ki *PID_Regulator->err[0];
-	PID_Regulator->KdComponent = PID_Regulator->kd * (PID_Regulator->err[0] - PID_Regulator->err[1]);
-	PID_Regulator->output = PID_Regulator->KpComponent + PID_Regulator->KiComponent+PID_Regulator->KdComponent;
-	
-	if(PID_Regulator->output - PID_Regulator->last_output > 8000)
-		PID_Regulator->output = PID_Regulator->last_output + 8000;
-	else if(PID_Regulator->output - PID_Regulator->last_output < -8000)
-		PID_Regulator->output = PID_Regulator->last_output - 8000;
-	
-	PID_Regulator->last_output = PID_Regulator->output;
 }
 
 void PID_Calc_Debug(PID_Regulator_t *pid,float kp,float ki,float kd)
@@ -315,6 +298,55 @@ void PID_Calc_GM_YS(PID_Regulator_t *pid)
 	pid->last_output = pid->output;
 	yaw_output = pid->output;
 }
+static uint8_t smart = 0;
+void PID_Smart(PID_Regulator_t *pid,float impulse)
+{
+	if(getCurrentTimeTick() - sPID.smart_timer > 10) // sample every 10ms
+	{
+		// update smart_buffer
+		sPID.smart_timer = getCurrentTimeTick();
+		sPID.smart_counter %= 5; // determine by buffer_size
+		sPID.smart_buffer[sPID.smart_counter++] = pid->err[0];
+		
+		// sort out maximum and minimum error
+		sPID.smart_max = 0;
+		sPID.smart_min = 360;
+		for(int i=0;i<5;i++)
+		{
+			if(sPID.smart_max < fabs(sPID.smart_buffer[i])) sPID.smart_max = sPID.smart_buffer[i];
+			if(sPID.smart_min > fabs(sPID.smart_buffer[i])) sPID.smart_min = sPID.smart_buffer[i];
+		}
+	}
+	// if error rate stays at around zero and error persists, increase output to cope with non-linear interval
+	if((fabs(sPID.smart_max-sPID.smart_min)<1.0f && fabs(pid->ref-pid->fdb)>5.0f)) //minimum change rate and converge interval defined here
+	{
+		if(pid->ref-pid->fdb>0) pid->output = impulse;
+		else pid->output = -impulse; // additional help (for GMYPositionPID)
+		smart = 1;
+	}
+	else
+	{
+		smart = 0; // do nothing
+	}
+}
 
+void PID_Calc_Arm(PID_Regulator_t *PID_Regulator)
+{
+	PID_Regulator->err[1] = PID_Regulator->err[0];
+	PID_Regulator->err[0] = (PID_Regulator->ref - PID_Regulator->fdb);
+
+		
+	PID_Regulator->KpComponent = PID_Regulator->kp * PID_Regulator->err[0];
+	PID_Regulator->KiComponent += PID_Regulator->ki *PID_Regulator->err[0];
+	PID_Regulator->KdComponent = PID_Regulator->kd * (PID_Regulator->err[0] - PID_Regulator->err[1]);
+	PID_Regulator->output = PID_Regulator->KpComponent + PID_Regulator->KiComponent+PID_Regulator->KdComponent;
+	
+	if(PID_Regulator->output - PID_Regulator->last_output > 8000)
+		PID_Regulator->output = PID_Regulator->last_output + 8000;
+	else if(PID_Regulator->output - PID_Regulator->last_output < -8000)
+		PID_Regulator->output = PID_Regulator->last_output - 8000;
+	
+	PID_Regulator->last_output = PID_Regulator->output;
+}
 
 

@@ -38,7 +38,7 @@ typedef struct CollectMode
 
 #define PREPARE_TIME_TICK_MS 4000
 #define CHASSIS_SPEED_ATTENUATION (1.0f)
-#define SPEED_OUTPUT_ATTENUATION (80.0f)
+#define SPEED_OUTPUT_ATTENUATION (1.0f)
 
 
 void CM_Control(void);

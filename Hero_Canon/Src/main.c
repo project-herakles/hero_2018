@@ -48,6 +48,7 @@
 /* USER CODE BEGIN Includes */
 #include "testTask.h"
 #include "controlTask.h"
+#include "imu_task.h"
 extern uint8_t RemoteBuffer[8];
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern uint8_t collect_mode_code;
