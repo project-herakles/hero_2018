@@ -99,7 +99,10 @@ void workStateFSM(void)
 			
 		case STOP_STATE:
 			if(getInputMode() != STOP_MODE)
+			{
 				setWorkState(PREPARE_STATE);
+				time_tick_ms = 0;
+			}
 			break;
 		default:;	
 	}
@@ -443,7 +446,7 @@ void Gimbal_Control(void)
 			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
 			//fuzzy test
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,0.8,0.001,0);
+				PID_Calc_Debug(&GMYPositionPID,1,0.001,0);
 			else
 				PID_Calc_Debug(&GMYPositionPID,0.5,0.00,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			GMYSpeedPID.ref = GMYPositionPID.output;
@@ -452,10 +455,10 @@ void Gimbal_Control(void)
 			
 			GMPPositionPID.ref = 0;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;			
-			PID_Calc_Debug(&GMPPositionPID,0.0,0.000,0);
+			PID_Calc_Debug(&GMPPositionPID,1,0.001,0);
 			GMPSpeedPID.ref = GMPPositionPID.output;
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
-			PID_Calc_Debug(&GMPSpeedPID,50.0,0.0,0.0);
+			PID_Calc_Debug(&GMPSpeedPID,100.0,0.0,0.0);
 			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
 			
 			yaw_offset = atti.yaw;
@@ -467,10 +470,9 @@ void Gimbal_Control(void)
 			
 			GMYPositionPID.ref = 0;
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
-			//PID_Calc_Debug(&GMYPositionPID,1.5,0,5);
 			
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,2.0,0.0001,0);
+				PID_Calc_Debug(&GMYPositionPID,50.0,0.00,0);
 			else
 				PID_Calc_Debug(&GMYPositionPID,1.0,0.0,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			
@@ -479,8 +481,6 @@ void Gimbal_Control(void)
 			GMYSpeedPID.ref = GMYPositionPID.output;
 			GMYSpeedPID.fdb = yaw_speed;
 			PID_Calc_Debug(&GMYSpeedPID,3,0.0,0);
-			
-			//yaw_speed = imu.wy * 180.0f/PI - yaw_speed_offset; // radian to degree
 			
 			GMPPositionPID.ref = Gimbal_Ref.pitch_angle_dynamic_ref;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;
