@@ -468,13 +468,13 @@ void Gimbal_Control(void)
 		{
 			yaw_speed = mpu_data.gz / 16.384f;
 			
-			GMYPositionPID.ref = 0;
+			GMYPositionPID.ref = Gimbal_Ref.yaw_angle_dynamic_ref;
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
 			
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,50.0,0.00,0);
+				PID_Calc_Debug(&GMYPositionPID,20.0,0.00,0);
 			else
-				PID_Calc_Debug(&GMYPositionPID,1.0,0.0,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+				PID_Calc_Debug(&GMYPositionPID,15.0,0.0,10); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			
 			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
 			

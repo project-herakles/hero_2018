@@ -269,7 +269,7 @@ uint8_t mpu_device_init(void)
 void mpu_offset_cal(void)
 {
   int i;
-  for (i = 0; i < 300; i++)
+  for (i = 0; i < 1000; i++)
   {
     mpu_read_regs(MPU6500_ACCEL_XOUT_H, mpu_buff, 14);
 
@@ -283,12 +283,12 @@ void mpu_offset_cal(void)
 
     MPU_INIT_DELAY(5);
   }
-  mpu_data.ax_offset=mpu_data.ax_offset / 300;
-  mpu_data.ay_offset=mpu_data.ay_offset / 300;
-  mpu_data.az_offset=mpu_data.az_offset / 300;
-  mpu_data.gx_offset=mpu_data.gx_offset / 300;
-  mpu_data.gy_offset=mpu_data.gx_offset / 300;
-  mpu_data.gz_offset=mpu_data.gz_offset / 300;
+  mpu_data.ax_offset=mpu_data.ax_offset / 1000;
+  mpu_data.ay_offset=mpu_data.ay_offset / 1000;
+  mpu_data.az_offset=mpu_data.az_offset / 1000;
+  mpu_data.gx_offset=mpu_data.gx_offset / 1000;
+  mpu_data.gy_offset=mpu_data.gy_offset / 1000;
+  mpu_data.gz_offset=mpu_data.gz_offset / 1000;
 	
 	imu_cali_flag = 1;
 }
