@@ -70,11 +70,11 @@ void MX_CAN1_Init(void)
 {
 
   hcan1.Instance = CAN1;
-  hcan1.Init.Prescaler = 16;
+  hcan1.Init.Prescaler = 3;
   hcan1.Init.Mode = CAN_MODE_NORMAL;
   hcan1.Init.SyncJumpWidth = CAN_SJW_1TQ;
   hcan1.Init.TimeSeg1 = CAN_BS1_9TQ;
-  hcan1.Init.TimeSeg2 = CAN_BS2_3TQ;
+  hcan1.Init.TimeSeg2 = CAN_BS2_4TQ;
   hcan1.Init.TimeTriggeredMode = DISABLE;
   hcan1.Init.AutoBusOff = DISABLE;
   hcan1.Init.AutoWakeUp = DISABLE;
@@ -333,18 +333,12 @@ void EncoderProcess(volatile Encoder *v, uint8_t* msg)
 
 void setArmSpeed(int16_t iq)
 {
-	canTxMsg0[0] = (unsigned char)(iq >> 8);
-	canTxMsg0[1] = (unsigned char) iq;
-	canTxMsg0[2] = 0;
-	canTxMsg0[3] = 0;
-	canTxMsg0[4] = 0;
-	canTxMsg0[5] = 0;
-	canTxMsg0[6] = 0;
-	canTxMsg0[7] = 0;
-	CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg0);
+	canTxMsg1[4] = (unsigned char)(iq >> 8);
+	canTxMsg1[5] = (unsigned char) iq;
+	//CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg1);
 }
 
-void GMShootControl()
+void GMArmShootControl()
 {
 	CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg1);
 }
@@ -355,8 +349,6 @@ void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq)
 	canTxMsg1[1] = (unsigned char) yaw_iq;
 	canTxMsg1[2] = (unsigned char)(pitch_iq >> 8);
 	canTxMsg1[3] = (unsigned char) pitch_iq;
-	canTxMsg1[4] = 0;
-	canTxMsg1[5] = 0;
 	//canTxMsg[6] = (unsigned char) (2000 >> 8);
 	//canTxMsg[7] = (unsigned char) 2000; //for M2006 testing
 	

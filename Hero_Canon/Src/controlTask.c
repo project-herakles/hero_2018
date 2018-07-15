@@ -517,7 +517,7 @@ void Control_Loop(void)
 
 	workStateFSM();
 	Gimbal_Control();
-	GMShootControl();
+	GMArmShootControl();
 	
 	if(time_tick_ms%4==0)
 	{
