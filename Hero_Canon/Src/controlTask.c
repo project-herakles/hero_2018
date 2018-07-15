@@ -53,6 +53,8 @@ float yaw_offset = 0;
 float yaw_speed = 0;
 float yaw_speed_offset = 0;
 
+extern uint32_t can_count;
+
 uint32_t getCurrentTimeTick(void)
 {
 	return time_tick_ms;
@@ -102,6 +104,7 @@ void workStateFSM(void)
 			{
 				setWorkState(PREPARE_STATE);
 				time_tick_ms = 0;
+				can_count = 0;
 			}
 			break;
 		default:;	
@@ -472,9 +475,9 @@ void Gimbal_Control(void)
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
 			
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,20.0,0.00,0);
+				PID_Calc_Debug(&GMYPositionPID,11.0,0.00,0);
 			else
-				PID_Calc_Debug(&GMYPositionPID,15.0,0.0,10); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+				PID_Calc_Debug(&GMYPositionPID,5.0,0.0,20); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			
 			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
 			

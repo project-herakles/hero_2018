@@ -317,7 +317,7 @@ void EncoderProcess(volatile Encoder *v, uint8_t* msg)
 	v->ecd_value = v->raw_value + v->round_cnt * 8192;
 	//计算得到角度值，范围正负无穷大
 	//v->ecd_angle = (float)(v->raw_value - v->ecd_bias)*360/8192 + v->round_cnt * 360;
-	v->ecd_angle = (float)(v->raw_value - v->ecd_bias)*360/8192;
+	v->ecd_angle = (float)(v->raw_value - v->ecd_bias)*360/8192.0f;
 	v->rate_buf[v->buf_count++] = v->ecd_raw_rate;
 	if(v->buf_count == RATE_BUF_SIZE)
 	{
