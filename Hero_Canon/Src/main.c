@@ -49,6 +49,7 @@
 #include "testTask.h"
 #include "controlTask.h"
 #include "imu_task.h"
+#include "gun.h"
 extern uint8_t RemoteBuffer[8];
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern uint8_t collect_mode_code;
@@ -109,17 +110,19 @@ int main(void)
   MX_CAN1_Init();
   MX_SPI5_Init();
   MX_TIM3_Init();
+  MX_TIM12_Init();
   /* USER CODE BEGIN 2 */
 	RED_LED_OFF();
-	GREEN_LED_OFF();
-	HAL_TIM_Base_Start_IT(&htim6);
-	HAL_TIM_Base_Start_IT(&htim2);
 	HAL_TIM_PWM_Init(&htim2);
-	
+	HAL_TIM_PWM_Init(&htim12);
+	gun_init();
+	GREEN_LED_OFF();
 	dbus_uart_init();
 	CAN_Initialize();
 	imu_param_init();
 	
+	HAL_TIM_Base_Start_IT(&htim6);
+	HAL_TIM_Base_Start_IT(&htim2);
 	Test_Task_Init();
   /* USER CODE END 2 */
 

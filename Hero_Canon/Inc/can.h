@@ -96,7 +96,7 @@ void CanReceiveMsgProcess(CAN_RxHeaderTypeDef *rxHeader,uint8_t* msg);
 void setArmSpeed(int16_t iq);
 void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq);
 void set_Shoot_speed(int16_t shoot_iq);
-void GMShootControl(void);
+void GMArmShootControl(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

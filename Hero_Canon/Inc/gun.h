@@ -1,15 +1,17 @@
 #ifndef __GUN_H_
 #define __GUN_H_
+#include "tim.h"
 
-#define PWM1  TIM12->CCR1
-#define PWM2  TIM12->CCR2
-#define PWM3  TIM9->CCR1
+#define SET_PWM1(x) __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_1, x)
+#define SET_PWM2(x) __HAL_TIM_SET_COMPARE(&htim12, TIM_CHANNEL_2, x)
 
 #define InitFrictionWheel()     \
-        PWM1 = 1000;             \
-        PWM2 = 1000;
+        SET_PWM1(1000);             \
+        SET_PWM2(1000);
 #define SetFrictionWheelSpeed(x) \
-        PWM1 = x;                \
-        PWM2 = x;
+        SET_PWM1(x);                \
+        SET_PWM2(x);
+
+void gun_init(void);
 
 #endif

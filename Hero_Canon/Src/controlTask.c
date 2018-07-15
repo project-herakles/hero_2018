@@ -449,7 +449,7 @@ void Gimbal_Control(void)
 			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
 			//fuzzy test
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,1,0.001,0);
+				PID_Calc_Debug(&GMYPositionPID,1,0.000,0);
 			else
 				PID_Calc_Debug(&GMYPositionPID,0.5,0.00,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			GMYSpeedPID.ref = GMYPositionPID.output;
@@ -465,7 +465,6 @@ void Gimbal_Control(void)
 			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
 			
 			yaw_offset = atti.yaw;
-			yaw_speed_offset = imu.wy * 180.0f/PI; // radian to degree
 		}break;
 		case NORMAL_STATE:
 		{
@@ -475,9 +474,9 @@ void Gimbal_Control(void)
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
 			
 			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,11.0,0.00,0);
+				PID_Calc_Debug(&GMYPositionPID,6,0.00,0);
 			else
-				PID_Calc_Debug(&GMYPositionPID,5.0,0.0,20); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+				PID_Calc_Debug(&GMYPositionPID,6,0.0,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			
 			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
 			
@@ -517,7 +516,7 @@ void Control_Loop(void)
 
 	workStateFSM();
 	Gimbal_Control();
-	GMShootControl();
+	GMArmShootControl();
 	
 	if(time_tick_ms%4==0)
 	{
