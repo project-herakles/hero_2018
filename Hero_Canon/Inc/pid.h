@@ -201,6 +201,27 @@ void PID_Smart(PID_Regulator_t *pid, float impluse);
 	&PID_Reset,\
 }\
 
+#define ROTATE_PID_DEFAULT \
+{\
+	0,\
+	0,\
+	{0,0},\
+	0,\
+	0,\
+	0.0f,\
+	0.0f,\
+	0.0f,\
+	0,\
+	0,\
+	0,\
+	5000,\
+	0,\
+	800,\
+	&PID_Calc,\
+	&PID_Reset,\
+}\
+
+
 #define SHOOT_POSITION_PID_DEFAULT \
 {\
 	0,\

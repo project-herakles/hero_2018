@@ -269,26 +269,28 @@ uint8_t mpu_device_init(void)
 void mpu_offset_cal(void)
 {
   int i;
+	int32_t ax_offset_sum=0, ay_offset_sum=0,az_offset_sum=0;
+	int32_t gx_offset_sum=0, gy_offset_sum=0,gz_offset_sum=0;
   for (i = 0; i < 1000; i++)
   {
     mpu_read_regs(MPU6500_ACCEL_XOUT_H, mpu_buff, 14);
 
-    mpu_data.ax_offset += mpu_buff[0] << 8 | mpu_buff[1];
-    mpu_data.ay_offset += mpu_buff[2] << 8 | mpu_buff[3];
-    mpu_data.az_offset += mpu_buff[4] << 8 | mpu_buff[5];
+    ax_offset_sum += mpu_buff[0] << 8 | mpu_buff[1];
+    ay_offset_sum += mpu_buff[2] << 8 | mpu_buff[3];
+    az_offset_sum += mpu_buff[4] << 8 | mpu_buff[5];
 
-    mpu_data.gx_offset += mpu_buff[8] << 8 | mpu_buff[9];
-    mpu_data.gy_offset += mpu_buff[10] << 8 | mpu_buff[11];
-    mpu_data.gz_offset += mpu_buff[12] << 8 | mpu_buff[13];
+    gx_offset_sum += mpu_buff[8] << 8 | mpu_buff[9];
+    gy_offset_sum += mpu_buff[10] << 8 | mpu_buff[11];
+    gz_offset_sum += mpu_buff[12] << 8 | mpu_buff[13];
 
     MPU_INIT_DELAY(5);
   }
-  mpu_data.ax_offset=mpu_data.ax_offset / 1000;
-  mpu_data.ay_offset=mpu_data.ay_offset / 1000;
-  mpu_data.az_offset=mpu_data.az_offset / 1000;
-  mpu_data.gx_offset=mpu_data.gx_offset / 1000;
-  mpu_data.gy_offset=mpu_data.gy_offset / 1000;
-  mpu_data.gz_offset=mpu_data.gz_offset / 1000;
+  mpu_data.ax_offset=ax_offset_sum / 1000;
+  mpu_data.ay_offset=ay_offset_sum / 1000;
+  mpu_data.az_offset=az_offset_sum / 1000;
+  mpu_data.gx_offset=gx_offset_sum / 1000;
+  mpu_data.gy_offset=gy_offset_sum / 1000;
+  mpu_data.gz_offset=gz_offset_sum / 1000;
 	
 	imu_cali_flag = 1;
 }

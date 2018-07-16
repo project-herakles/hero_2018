@@ -24,10 +24,12 @@ uint8_t rescue_flag = 0;
 uint8_t collect_mode_code = 0;
 uint8_t claw_in_place = 0;//Variable for human supervision, change by clicking
 uint8_t waveLength = 50; 
+
 PID_Regulator_t CM1SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t CM2SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t CM3SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
 PID_Regulator_t CM4SpeedPID = CHASSIS_MOTOR_SPEED_PID_DEFAULT;
+PID_Regulator_t RotatePID = ROTATE_PID_DEFAULT;
 PID_Regulator_t GMYPositionPID = YAW_POSITION_PID_DEFAULT;
 PID_Regulator_t GMPPositionPID = PITCH_POSITION_PID_DEFAULT;
 PID_Regulator_t GMYSpeedPID = YAW_SPEED_PID_DEFAULT;
@@ -113,6 +115,18 @@ void workStateFSM(void)
 
 void CM_Control(void)
 {
+	if(getWorkState()== NORMAL_STATE)
+	{
+		RotatePID.ref = 0;
+		RotatePID.fdb = GMYawEncoder.ecd_angle;
+		PID_Calc_Debug(&RotatePID,1,0,0);
+		chassis_speed_ref.rotate_ref = RotatePID.output;
+	}
+	else
+	{
+		chassis_speed_ref.rotate_ref = 0;
+	}
+	
 	/*
 	CM1SpeedPID.ref =  (-chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref)*18;
 	CM2SpeedPID.ref = (chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref)*18;
