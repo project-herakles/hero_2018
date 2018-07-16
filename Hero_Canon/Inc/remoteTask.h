@@ -69,6 +69,7 @@ typedef struct
 #define HIGH_FORWARD_BACK_SPEED 			250
 #define HIGH_LEFT_RIGHT_SPEED   			300
 #define STICK_TO_PITCH_ANGLE_INC_FACT       0.004f
+#define STICK_TO_ROTATE_REF_FACT 						0.30f
 #define STICK_TO_YAW_ANGLE_INC_FACT         0.004f
 
 #define PI 3.14159265358979323846

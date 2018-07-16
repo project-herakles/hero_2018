@@ -115,6 +115,15 @@ void workStateFSM(void)
 
 void CM_Control(void)
 {
+	
+	// rotate with stick
+	CM1SpeedPID.ref =  (-chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref*0.075)*18;
+	CM2SpeedPID.ref = (chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref*0.075)*18;
+	CM3SpeedPID.ref = (chassis_speed_ref.forward_back_ref*0.075 - chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref*0.075)*18;
+	CM4SpeedPID.ref = (-chassis_speed_ref.forward_back_ref*0.075 - chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref*0.075)*18; 
+	
+	// rotate with yaw 
+	/*
 	if(getWorkState()== NORMAL_STATE)
 	{
 		RotatePID.ref = 0;
@@ -126,7 +135,7 @@ void CM_Control(void)
 	{
 		chassis_speed_ref.rotate_ref = 0;
 	}
-	
+	*/
 	/*
 	CM1SpeedPID.ref =  (-chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref)*18;
 	CM2SpeedPID.ref = (chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref)*18;
@@ -134,10 +143,13 @@ void CM_Control(void)
 	CM4SpeedPID.ref = (-chassis_speed_ref.forward_back_ref*0.075 - chassis_speed_ref.left_right_ref*0.075 + chassis_speed_ref.rotate_ref)*18; 
 	*/
 	
+	// no rotate
+	/*
 	CM1SpeedPID.ref =  (-chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075)*18;
 	CM2SpeedPID.ref = (chassis_speed_ref.forward_back_ref*0.075 + chassis_speed_ref.left_right_ref*0.075)*18;
 	CM3SpeedPID.ref = (chassis_speed_ref.forward_back_ref*0.075 - chassis_speed_ref.left_right_ref*0.075)*18;
 	CM4SpeedPID.ref = (-chassis_speed_ref.forward_back_ref*0.075 - chassis_speed_ref.left_right_ref*0.075)*18; 
+	*/
 	
 	CM1SpeedPID.fdb = CM1Encoder.filter_rate;
 	CM2SpeedPID.fdb = CM2Encoder.filter_rate;
@@ -482,6 +494,18 @@ void Gimbal_Control(void)
 		}break;
 		case NORMAL_STATE:
 		{
+			// YAW WITH ENCODER
+			GMYPositionPID.ref = 0;
+			GMYPositionPID.fdb = GMYawEncoder.ecd_angle;
+			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
+				PID_Calc_Debug(&GMYPositionPID,1,0.000,0);
+			else
+				PID_Calc_Debug(&GMYPositionPID,0.5,0.00,5); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+			GMYSpeedPID.ref = GMYPositionPID.output;
+			GMYSpeedPID.fdb = GMYawEncoder.filter_rate;
+			PID_Calc_Debug(&GMYSpeedPID,50,0,0);
+			
+			/* YAW WITH IMU
 			yaw_speed = mpu_data.gz / 16.384f;
 			
 			GMYPositionPID.ref = Gimbal_Ref.yaw_angle_dynamic_ref;
@@ -491,7 +515,7 @@ void Gimbal_Control(void)
 				PID_Calc_Debug(&GMYPositionPID,6,0.00,0);
 			else
 				PID_Calc_Debug(&GMYPositionPID,6,0.0,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
-			
+		*/
 			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
 			
 			GMYSpeedPID.ref = GMYPositionPID.output;
@@ -530,7 +554,7 @@ void Control_Loop(void)
 
 	workStateFSM();
 	Gimbal_Control();
-	GMArmShootControl();
+	//GMArmShootControl();
 	
 	if(time_tick_ms%4==0)
 	{

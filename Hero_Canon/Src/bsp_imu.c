@@ -271,7 +271,7 @@ void mpu_offset_cal(void)
   int i;
 	int32_t ax_offset_sum=0, ay_offset_sum=0,az_offset_sum=0;
 	int32_t gx_offset_sum=0, gy_offset_sum=0,gz_offset_sum=0;
-  for (i = 0; i < 1000; i++)
+  for (i = 0; i < 100; i++)
   {
     mpu_read_regs(MPU6500_ACCEL_XOUT_H, mpu_buff, 14);
 
@@ -285,12 +285,12 @@ void mpu_offset_cal(void)
 
     MPU_INIT_DELAY(5);
   }
-  mpu_data.ax_offset=ax_offset_sum / 1000;
-  mpu_data.ay_offset=ay_offset_sum / 1000;
-  mpu_data.az_offset=az_offset_sum / 1000;
-  mpu_data.gx_offset=gx_offset_sum / 1000;
-  mpu_data.gy_offset=gy_offset_sum / 1000;
-  mpu_data.gz_offset=gz_offset_sum / 1000;
+  mpu_data.ax_offset=ax_offset_sum / 100;
+  mpu_data.ay_offset=ay_offset_sum / 100;
+  mpu_data.az_offset=az_offset_sum / 100;
+  mpu_data.gx_offset=gx_offset_sum / 100;
+  mpu_data.gy_offset=gy_offset_sum / 100;
+  mpu_data.gz_offset=gz_offset_sum / 100;
 	
 	imu_cali_flag = 1;
 }
