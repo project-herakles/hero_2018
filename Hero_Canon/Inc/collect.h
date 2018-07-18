@@ -2,8 +2,9 @@
 #define COLLECT_H_
 
 //unit: ms
-#define POUR_DELAY 2000
+#define POUR_DELAY 4000
 #define CLAW_OUT_DELAY 5000
+#define RELEASE_DELAY 2000
 
 #define ARM_Angle_to_Encoder 77116.0f/180.0f
 #define WITH_BOX 1

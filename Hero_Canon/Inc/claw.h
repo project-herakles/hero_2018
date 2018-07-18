@@ -1,7 +1,7 @@
 #ifndef CLAW_H_
 #define CLAW_H_
 
-#define CLAW_ENABLE()
-#define CLAW_DISABLE()
+#define CLAW_ENABLE() HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_SET)
+#define CLAW_DISABLE() HAL_GPIO_WritePin(GPIOC,GPIO_PIN_5,GPIO_PIN_RESET)
 
 #endif

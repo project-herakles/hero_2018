@@ -12,6 +12,8 @@
 #define HEIGHT1 84
 #define HEIGHT2 100
 
+// unit: millionseconds
+#define LATCH_DELAY 1000
 
 void Lift_init(void);
 void Lift_setHeight(uint16_t mm);

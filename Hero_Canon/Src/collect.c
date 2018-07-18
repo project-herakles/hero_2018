@@ -6,6 +6,8 @@
 #include "stm32f4xx.h"
 #include "lifter.h"
 #include "claw.h"
+#include "gpio.h"
+
 extern uint32_t time_tick_ms;
 static uint32_t delay_start_time;
 Collect_State_t collectState;
@@ -230,6 +232,7 @@ void Collect_Control(void)
 			Arm_Mode = ARM_IN;
 			Arm_Control(WITHOUT_BOX);
 			CLAW_DISABLE();
+			Lift_setHeight(HEIGHT0);
 			if(getCurrentHeight()!=0)
 			{
 				Lift_setHeight(HEIGHT0);
@@ -244,6 +247,7 @@ void Collect_Control(void)
 			Arm_Mode = ARM_IN;
 			Arm_Control(WITHOUT_BOX);
 			CLAW_DISABLE();
+			Lift_setHeight(HEIGHT1);
 			if(RC_CtrlData.rc.s1 == 3)
 			{
 				collectState = COLLECT_GRAB;
@@ -256,8 +260,10 @@ void Collect_Control(void)
 			if(ARM_OUT_InPos==1)
 			{
 				CLAW_ENABLE();
-				if(RC_CtrlData.rc.s1 == 2)
+				Lift_setHeight(HEIGHT2);
+				if(getCurrentHeight()==HEIGHT2)
 				{
+					delay_start_time = getCurrentTimeTick();
 					collectState = COLLECT_POUR;
 				}
 			}
@@ -268,8 +274,9 @@ void Collect_Control(void)
 			Arm_Control(WITH_BOX);
 			if(ARM_IN_InPos==1)
 			{
-				if(RC_CtrlData.rc.s1 == 3)
+				if(getCurrentTimeTick()-delay_start_time > POUR_DELAY)
 				{
+					delay_start_time = getCurrentTimeTick();
 					collectState = COLLECT_RELEASE;
 				}
 			}
@@ -280,10 +287,14 @@ void Collect_Control(void)
 			Arm_Control(WITH_BOX);
 			if(ARM_OUT_InPos==1)
 			{
-				CLAW_DISABLE();
-				if(RC_CtrlData.rc.s1 == 2)
+				Lift_setHeight(HEIGHT1);
+				if(getCurrentHeight() == HEIGHT1)
 				{
-					collectState = COLLECT_REST;
+					CLAW_DISABLE();
+					if(getCurrentTimeTick()-delay_start_time > RELEASE_DELAY)
+					{
+						collectState = COLLECT_REST;
+					}
 				}
 			}
 		}break;

@@ -267,7 +267,8 @@ void TIM2_IRQHandler(void)
 	{
 		if(stepper_left.pulses-- ==0)
 		{
-			stepper_stop(&stepper_left);
+			stepper_stop(&stepper_right);
+			stepper_right.pulses = 0;
 		}
 	}
   /* USER CODE END TIM2_IRQn 0 */
