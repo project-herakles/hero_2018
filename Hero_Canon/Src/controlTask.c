@@ -7,8 +7,9 @@
 #include "math.h"
 #include "imu_task.h"
 #include "math.h"
+#include "collect.h"
 
-#define ARM_Angle_to_Encoder 77116.0f/180.0f
+
 #define RESCUE_CLAW_ENABLE() HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_SET)
 #define RESCUE_CLAW_DISABLE() HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_RESET)
 
@@ -34,8 +35,6 @@ PID_Regulator_t GMYPositionPID = YAW_POSITION_PID_DEFAULT;
 PID_Regulator_t GMPPositionPID = PITCH_POSITION_PID_DEFAULT;
 PID_Regulator_t GMYSpeedPID = YAW_SPEED_PID_DEFAULT;
 PID_Regulator_t GMPSpeedPID = PITCH_SPEED_PID_DEFAULT;
-PID_Regulator_t ArmPositionPID = ARM_POSITION_PID_DEFAULT;
-PID_Regulator_t ArmSpeedPID = ARM_SPEED_PID_DEFAULT;
 
 extern volatile Encoder ArmEncoder;
 extern volatile Encoder GMYawEncoder;
@@ -217,147 +216,14 @@ void code2mode(uint8_t code,CollectMode *collectMode){
 }
 
 
-
+//ARM_IN:arm is moving in or has been already inside
+//ARM_OUT:arm is moving out ro has been already outside
+//ARM_REST: output = 0;
 //need input(instructions):
-void Collect_Control(void)
-{	
-	if(ArmSpeedPID.ki == 0)
-		ArmSpeedPID.KiComponent = 0;
-	ArmSpeedPID.fdb = ArmEncoder.filter_rate;
-	if(RC_CtrlData.rc.s2 != 1)
-	{
-		if(RC_CtrlData.rc.s1 == 2)
-		{
-			if(ArmEncoder.ecd_value < Arm_Encoder_Init - 150 * ARM_Angle_to_Encoder)
-			{
-				 ArmSpeedPID.ref = 200;
-				ArmSpeedPID.kp = 100.0f;
-				ArmSpeedPID.ki = 0;
-			 PID_Calc_Arm(&ArmSpeedPID);
-			}
-
-			else if (ArmEncoder.ecd_value <Arm_Encoder_Init - 3 * ARM_Angle_to_Encoder)
-	   {       
-				ArmSpeedPID.ref = 200;
-				ArmSpeedPID.kp = 100.0f;
-	    	ArmSpeedPID.ki = 0;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-			else
-			{
-				ArmSpeedPID.ref = 0;
-				ArmSpeedPID.kp = 60.0f;
-				ArmSpeedPID.ki = 0;
-				//ArmSpeedPID.ki = 0.003;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-		}
-		else if(RC_CtrlData.rc.s1 == 1)//without box
-		{
-			
-			if(ArmEncoder.ecd_value > Arm_Encoder_Init - 90 * ARM_Angle_to_Encoder)
-			{
-        ArmSpeedPID.ref = -200;
-				ArmSpeedPID.kp = 100.0f;
-				ArmSpeedPID.ki = 0;
-			 PID_Calc_Arm(&ArmSpeedPID);
-			}
-			else if (ArmEncoder.ecd_value >Arm_Encoder_Init - 170 * ARM_Angle_to_Encoder)
-			{
-				ArmSpeedPID.ref = -200;
-				ArmSpeedPID.kp = 100.0f;
-				ArmSpeedPID.ki = 0;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-			else 
-			{
-				ArmSpeedPID.ref = 0;
-				ArmSpeedPID.kp = 80.0f;
-				ArmSpeedPID.ki = 0.2;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-		}
-		else if(RC_CtrlData.rc.s1 == 3)
-		{
-			ArmSpeedPID.ref = 0;
-			ArmSpeedPID.kp = 100.0f;
-			ArmSpeedPID.ki = 0;
-			
-			//PID_Calc_Arm(&ArmSpeedPID);
-			ArmSpeedPID.output=0;
-		}
-	}
-	else//with heavy object; grabbing the box 
-	{
-		if(RC_CtrlData.rc.s1 == 2)//move back
-		{
-			if(ArmEncoder.ecd_value < Arm_Encoder_Init - 110 * ARM_Angle_to_Encoder)
-			{
-				 ArmSpeedPID.ref = 60;
-				ArmSpeedPID.kp = 120.0f;
-				ArmSpeedPID.ki = 5;//to keep the kicomponent; cancel out with the static torque
-			 PID_Calc_Arm(&ArmSpeedPID);
-			}
-
-			else if (ArmEncoder.ecd_value <Arm_Encoder_Init - 15 * ARM_Angle_to_Encoder)
-    	{       
-				ArmSpeedPID.ref = 60;
-				ArmSpeedPID.kp = 120.0f;
-		    ArmSpeedPID.ki = 0;//abandon kicomponent; use kp only because the static torque is changing
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-			else//output to speed down
-			{
-				ArmSpeedPID.ref = 0;
-				ArmSpeedPID.kp = 100.0f;
-				ArmSpeedPID.ki = 0;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-		}
-		else if(RC_CtrlData.rc.s1 == 1)//move forward
-		{
-			if(ArmEncoder.ecd_value > Arm_Encoder_Init - 90 * ARM_Angle_to_Encoder)
-			{
-			  ArmSpeedPID.ref = -150;
-				ArmSpeedPID.kp = 120.0f;
-				ArmSpeedPID.ki = 0;
-			 PID_Calc_Arm(&ArmSpeedPID);
-			}
-			else if (ArmEncoder.ecd_value >Arm_Encoder_Init - 170 * ARM_Angle_to_Encoder)//Almost there
-			{
-				ArmSpeedPID.ref = -150;
-				ArmSpeedPID.kp = 120.0f;
-				ArmSpeedPID.ki = 0;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-			else //when grabbing & lifting: hope the arm will stay still
-			{
-				ArmSpeedPID.ref = 0;
-				ArmSpeedPID.kp = 120.0f;
-				ArmSpeedPID.ki = 7;
-				PID_Calc_Arm(&ArmSpeedPID);
-			}
-		}
-		else if(RC_CtrlData.rc.s1 == 3)
-		{
-			ArmSpeedPID.ref = 0;
-			ArmSpeedPID.kp = 100.0f;
-			ArmSpeedPID.ki = 0;
-			ArmSpeedPID.output = 0;
-		}
-	}
-	
-	//set output limit
-	if(ArmSpeedPID.output>16384)
-		ArmSpeedPID.output = 16384;
-	else if(ArmSpeedPID.output<-16384)
-		ArmSpeedPID.output = -16384;
-  setArmSpeed(ArmSpeedPID.output);
-}
 
 void contorlTaskInit(void)
 {
-    Arm_Encoder_Init = ArmEncoder.ecd_value;	
+    return;
 }
 
 
@@ -581,8 +447,8 @@ void Control_Loop(void)
 	{
 		CM_Control();
 	}
-	/*
+	
 	Collect_Control();
 	CollectClawControl();
-	*/
+	
 }

@@ -8,13 +8,15 @@
 #define LIFT_STAGE3 3
 
 // unit: millionmeters
-#define HEIGHT1_2 84
-#define HEIGHT2_3 100
+#define HEIGHT1 0
+#define HEIGHT1 84
+#define HEIGHT2 100
 
-uint16_t currentHeight;
 
-void lift_setHeight(uint16_t mm);
-void lift_hold(void);
-void lift_idle(void);
+void Lift_init(void);
+void Lift_setHeight(uint16_t mm);
+void Lift_hold(void);
+void Lift_idle(void);
+uint16_t getCurrentHeight(void);
 
 #endif
