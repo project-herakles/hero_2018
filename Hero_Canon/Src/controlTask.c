@@ -8,6 +8,7 @@
 #include "imu_task.h"
 #include "math.h"
 #include "collect.h"
+#include "gun.h"
 
 
 #define RESCUE_CLAW_ENABLE() HAL_GPIO_WritePin(GPIOF,GPIO_PIN_10,GPIO_PIN_SET)
@@ -35,6 +36,8 @@ PID_Regulator_t GMYPositionPID = YAW_POSITION_PID_DEFAULT;
 PID_Regulator_t GMPPositionPID = PITCH_POSITION_PID_DEFAULT;
 PID_Regulator_t GMYSpeedPID = YAW_SPEED_PID_DEFAULT;
 PID_Regulator_t GMPSpeedPID = PITCH_SPEED_PID_DEFAULT;
+PID_Regulator_t ShootPositionPID = SHOOT_POSITION_PID_DEFAULT;
+PID_Regulator_t ShootSpeedPID = SHOOT_SPEED_PID_DEFAULT;
 
 extern volatile Encoder ArmEncoder;
 extern volatile Encoder GMYawEncoder;
@@ -43,6 +46,7 @@ extern volatile Encoder CM1Encoder;
 extern volatile Encoder CM2Encoder;
 extern volatile Encoder CM3Encoder;
 extern volatile Encoder CM4Encoder;
+extern volatile Encoder ShootEncoder;
 extern Chassis_speed_ref_t chassis_speed_ref;
 extern RC_Ctrl_t RC_CtrlData;
 extern Gimbal_Ref_t Gimbal_Ref;
@@ -173,49 +177,6 @@ void CM_Control(void)
 	}
 }
 
-void code2mode(uint8_t code,CollectMode *collectMode){
-	switch(code)
-	{
-		case 0:
-			collectMode->armMode = ACUTE;
-			collectMode->clawMode = CLAW_DISABLE;
-			collectMode->dumperMode = REST;
-			break;
-		case 1:
-			collectMode->armMode = OBTUSE;
-			collectMode->clawMode = CLAW_DISABLE;
-			collectMode->dumperMode = REST;
-			break;
-		case 2:
-			collectMode->armMode = OBTUSE;
-			collectMode->clawMode = CLAW_ENABLE;
-			collectMode->dumperMode = REST;
-			break;
-		case 3:
-			collectMode->armMode = RIGHT;
-			collectMode->clawMode = CLAW_ENABLE;
-			collectMode->dumperMode = HOLD;
-			break;
-		case 4:
-			collectMode->armMode = RIGHT;
-			collectMode->clawMode = CLAW_DISABLE;
-			collectMode->dumperMode = HOLD;
-			break;
-		case 5:
-			collectMode->armMode = ACUTE;
-			collectMode->clawMode = CLAW_DISABLE;
-			collectMode->dumperMode = HOLD;
-			break;
-		case 6:
-			collectMode->armMode = ACUTE;
-			collectMode->clawMode = CLAW_DISABLE;
-			collectMode->dumperMode = DUMP;
-			break;
-	}
-	return;
-}
-
-
 //ARM_IN:arm is moving in or has been already inside
 //ARM_OUT:arm is moving out ro has been already outside
 //ARM_REST: output = 0;
@@ -224,111 +185,6 @@ void code2mode(uint8_t code,CollectMode *collectMode){
 void contorlTaskInit(void)
 {
     return;
-}
-
-
-void CollectModeSwitch(void)
-{	
-	switch(collectMode.dumperMode)
-	{
-		case REST:
-			waveLength = 45;
-			break;
-		case DUMP:
-			waveLength = 12;
-			break;
-		case HOLD:
-			waveLength = 30;
-			break;
-	}
-	
-	switch(collect_mode_code)
-	{
-		case 0:
-			if(collect_flag==1)
-				collect_mode_code++;
-			break;
-		case 1:
-			if(claw_in_place==1)
-			{
-				collect_mode_code++;
-				claw_in_place=0;
-				countdown = 1;
-			}
-			break;
-		case 2:
-			if(countdown==1)
-			{
-				start_time_tick_ms = getCurrentTimeTick();
-				countdown=0;
-			}
-			if(getCurrentTimeTick()-start_time_tick_ms > 2000)
-			{
-				collect_mode_code++;
-				countdown=1;
-			}
-			break;
-		case 3:
-			if(countdown==1)
-			{
-				start_time_tick_ms = getCurrentTimeTick();
-				countdown=0;
-			}
-			if(getCurrentTimeTick()-start_time_tick_ms > 2000)
-			{
-				collect_mode_code++;
-				countdown=1;
-			}
-			break;
-		case 4:
-			if(countdown==1)
-			{
-				start_time_tick_ms = getCurrentTimeTick();
-				countdown=0;
-			}
-			if(getCurrentTimeTick()-start_time_tick_ms > 2000)
-			{
-				collect_mode_code++;
-				countdown=1;
-			}
-			break;
-		case 5:
-			if(countdown==1)
-			{
-				start_time_tick_ms = getCurrentTimeTick();
-				countdown=0;
-			}
-			if(getCurrentTimeTick()-start_time_tick_ms > 2000)
-			{
-				collect_mode_code++;
-				countdown=1;
-			}
-			break;
-		case 6:
-			if(countdown==1)
-			{
-				start_time_tick_ms = getCurrentTimeTick();
-				countdown=0;
-			}
-			if(getCurrentTimeTick()-start_time_tick_ms > 2000)
-			{
-				collect_mode_code++;
-				collect_flag = 0;
-			}
-			break;
-	}
-	code2mode(collect_mode_code,&collectMode);
-}
-
-
-
-
-void CollectClawControl(void)
-{	
-	if(RC_CtrlData.rc.s2 == 1)
-		RESCUE_CLAW_ENABLE();
-	else
-		RESCUE_CLAW_DISABLE();
 }
 
 void Gimbal_Control(void)
@@ -430,6 +286,62 @@ void Gimbal_Control(void)
 		}
 	}
 }
+void FrictionWheelControl(void)
+{
+  //if(PC_cmd.shoot.fire == 1) //Receive shooting command from odroid
+	//if(RC_CtrlData.rc.s2 == 1)
+	if(getWorkState() == NORMAL_STATE && RC_CtrlData.rc.s1==1)
+	{
+		SetFrictionWheelSpeed(1800);
+	}
+	else
+	{
+		SetFrictionWheelSpeed(1000);
+	}
+}
+
+void shootMotorControl(void)
+{
+	//if(PC_cmd.shoot.fire == 1) //Receive shooting command from odroid
+	if(RC_CtrlData.rc.s1 == 1)
+	{
+		ShootSpeedPID.ref = 120; // was 160
+		ShootSpeedPID.fdb = ShootEncoder.filter_rate;
+		PID_Calc_Debug(&ShootSpeedPID,10,0.002,0); 
+		set_Shoot_speed(ShootSpeedPID.output); //Trigger Motor PID here
+	}
+	else
+	{ 
+		set_Shoot_speed(0);
+		// Trigger Motor stop
+	}
+}
+
+void Shoot_Control(void)
+{
+	switch(workState)
+	{
+		case PREPARE_STATE:
+		{
+			InitFrictionWheel();
+		}break;
+		case NORMAL_STATE:
+		{
+			FrictionWheelControl();
+			shootMotorControl();
+		}break;
+		case STOP_STATE:
+		{
+			SetFrictionWheelSpeed(1000); // FrictionWheel stops	
+			set_Shoot_speed(0);	// Trigger Motor stop
+		}break;
+		default:
+		{
+		}
+	}
+}
+
+
 
 void Control_Loop(void)
 {
@@ -452,4 +364,5 @@ void Control_Loop(void)
 	if(workState == NORMAL_STATE)
 		Collect_Control();
 	
+	Shoot_Control();
 }
