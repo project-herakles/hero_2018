@@ -262,7 +262,10 @@ uint8_t mpu_device_init(void)
   }
   
   ist8310_init();
-  mpu_offset_cal();
+  //mpu_offset_cal(); //calculate offset when starting up, replaced by hardcode 
+	mpu_data.gx_offset = 40;
+	mpu_data.gy_offset = 17;
+	mpu_data.gz_offset = -24;
   return 0;
 }
 
