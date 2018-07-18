@@ -513,7 +513,8 @@ void Gimbal_Control(void)
 			// YAW WITH IMU
 			yaw_speed = mpu_data.gz / 16.384f;
 			
-			//GMYPositionPID.ref = Gimbal_Ref.yaw_angle_dynamic_ref;
+			GMYPositionPID.ref = Gimbal_Ref.yaw_angle_dynamic_ref;
+			/*
 			if(time_tick_ms%4000==0)
 			{
 				if(GMYPositionPID.ref==0)
@@ -525,15 +526,17 @@ void Gimbal_Control(void)
 					GMYPositionPID.ref = 0;
 				}
 			}
+			*/
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
-			//PID_Calc_Debug(&GMYPositionPID,10,0.0001,0);
+			//PID_Calc_Debug(&GMYPositionPID,8,0.00,300);
 			
-			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<10.0f)
-				PID_Calc_Debug(&GMYPositionPID,10,0.0001,0);
+			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
+				PID_Calc_Debug(&GMYPositionPID,15,0.004,100);
 			else
-				PID_Calc_Debug(&GMYPositionPID,8,0.0,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
-			
-			
+			{
+				//GMYPositionPID.KiComponent = 0; // clear ki if step occurs
+				PID_Calc_Debug(&GMYPositionPID,10,0.00,300); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
+			}
 			//GMYSpeedPID.ref = 0;
 			GMYSpeedPID.ref = GMYPositionPID.output;
 			GMYSpeedPID.fdb = yaw_speed;
