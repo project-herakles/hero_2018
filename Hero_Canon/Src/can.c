@@ -297,21 +297,24 @@ void EncoderProcess(volatile Encoder *v, uint8_t* msg)
 	v->diff = v->raw_value - v->last_raw_value;
 	if(can_count < 50)
 	{
-		v->diff = 0;
+		v->ecd_raw_rate = 0;
 	}
-	if(v->diff < -7000)    //两次编码器的反馈值差别太大，表示圈数发生了改变
-	{
-		v->round_cnt++;
-		v->ecd_raw_rate = v->diff + 8192;
-	}
-	else if(v->diff>7000)
-	{
-		v->round_cnt--;
-		v->ecd_raw_rate = v->diff- 8192;
-	}		
 	else
 	{
-		v->ecd_raw_rate = v->diff;
+		if(v->diff < -7000)    //两次编码器的反馈值差别太大，表示圈数发生了改变
+		{
+			v->round_cnt++;
+			v->ecd_raw_rate = v->diff + 8192;
+		}
+		else if(v->diff>7000)
+		{
+			v->round_cnt--;
+			v->ecd_raw_rate = v->diff- 8192;
+		}		
+		else
+		{
+			v->ecd_raw_rate = v->diff;
+		}
 	}
 	//计算得到连续的编码器输出值
 	v->ecd_value = v->raw_value + v->round_cnt * 8192;

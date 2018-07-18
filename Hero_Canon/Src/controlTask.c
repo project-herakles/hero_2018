@@ -107,6 +107,8 @@ void workStateFSM(void)
 				setWorkState(PREPARE_STATE);
 				time_tick_ms = 0;
 				can_count = 0;
+				Gimbal_Ref.yaw_angle_dynamic_ref = 0;
+				Gimbal_Ref.pitch_angle_dynamic_ref = 0;
 			}
 			break;
 		default:;	
@@ -488,8 +490,8 @@ void Gimbal_Control(void)
 			GMPSpeedPID.ref = GMPPositionPID.output;
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
 			PID_Calc_Debug(&GMPSpeedPID,100.0,0.0,0.0);
-			//set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
-			set_GM_speed(0,-GMPSpeedPID.output);
+			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+			//set_GM_speed(0,-GMPSpeedPID.output);
 			
 			yaw_offset = atti.yaw;
 		}break;
@@ -511,18 +513,31 @@ void Gimbal_Control(void)
 			// YAW WITH IMU
 			yaw_speed = mpu_data.gz / 16.384f;
 			
-			GMYPositionPID.ref = Gimbal_Ref.yaw_angle_dynamic_ref;
+			//GMYPositionPID.ref = Gimbal_Ref.yaw_angle_dynamic_ref;
+			if(time_tick_ms%4000==0)
+			{
+				if(GMYPositionPID.ref==0)
+				{
+					GMYPositionPID.ref = 30;
+				}
+				else
+				{
+					GMYPositionPID.ref = 0;
+				}
+			}
 			GMYPositionPID.fdb = atti.yaw - yaw_offset;
+			//PID_Calc_Debug(&GMYPositionPID,10,0.0001,0);
 			
-			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<5.0f)
-				PID_Calc_Debug(&GMYPositionPID,6,0.00,0);
+			if(fabs(GMYPositionPID.ref-GMYPositionPID.fdb)<10.0f)
+				PID_Calc_Debug(&GMYPositionPID,10,0.0001,0);
 			else
-				PID_Calc_Debug(&GMYPositionPID,6,0.0,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
-			//PID_Smart(&GMYPositionPID,10); // cope with non-linear inteval
+				PID_Calc_Debug(&GMYPositionPID,8,0.0,0); // a debug version of PID_Calc for testing parameters (P=0.6,I=0.0003,D=8)
 			
+			
+			//GMYSpeedPID.ref = 0;
 			GMYSpeedPID.ref = GMYPositionPID.output;
 			GMYSpeedPID.fdb = yaw_speed;
-			//PID_Calc_Debug(&GMYSpeedPID,3,0.0,0);
+			PID_Calc_Debug(&GMYSpeedPID,1,0.0,0);
 			
 			GMPPositionPID.ref = Gimbal_Ref.pitch_angle_dynamic_ref;
 			GMPPositionPID.fdb = GMPitchEncoder.ecd_angle;
@@ -537,8 +552,8 @@ void Gimbal_Control(void)
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
 			PID_Calc_Debug(&GMPSpeedPID,100,0.0,0.0);
 			
-			//set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
-			set_GM_speed(0,-GMPSpeedPID.output); //disable yaw
+			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+			//set_GM_speed(0,-GMPSpeedPID.output); //disable yaw
 		}break;
 		default:
 		{
