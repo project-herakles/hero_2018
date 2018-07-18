@@ -356,8 +356,8 @@ void Gimbal_Control(void)
 			GMPSpeedPID.ref = GMPPositionPID.output;
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
 			PID_Calc_Debug(&GMPSpeedPID,100.0,0.0,0.0);
-			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
-			//set_GM_speed(0,-GMPSpeedPID.output);
+			//set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+			set_GM_speed(0,-GMPSpeedPID.output);
 			
 			yaw_offset = atti.yaw;
 		}break;
@@ -421,8 +421,8 @@ void Gimbal_Control(void)
 			GMPSpeedPID.fdb = GMPitchEncoder.filter_rate;
 			PID_Calc_Debug(&GMPSpeedPID,100,0.0,0.0);
 			
-			set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
-			//set_GM_speed(0,-GMPSpeedPID.output); //disable yaw
+			//set_GM_speed(-GMYSpeedPID.output,-GMPSpeedPID.output);
+			set_GM_speed(0,-GMPSpeedPID.output); //disable yaw
 		}break;
 		default:
 		{
@@ -448,7 +448,8 @@ void Control_Loop(void)
 		CM_Control();
 	}
 	
-	Collect_Control();
-	CollectClawControl();
+	//Collect_Mode_Switch();
+	if(workState == NORMAL_STATE)
+		Collect_Control();
 	
 }

@@ -152,7 +152,7 @@ void PID_Smart(PID_Regulator_t *pid, float impluse);
 	0,\
 	0,\
 	0,\
-	6429,\
+	4385,\
 	0,\
 	0,\
 	0,\

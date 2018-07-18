@@ -68,7 +68,7 @@ void Arm_Control(uint8_t heavy)
 			 PID_Calc_Arm(&ArmSpeedPID);
 				ARM_OUT_InPos = 0;
 			}
-			else if (ArmEncoder.ecd_value >ArmEncoder.ecd_bias - 170 * ARM_Angle_to_Encoder)
+			else if (ArmEncoder.ecd_value >ArmEncoder.ecd_bias - 180 * ARM_Angle_to_Encoder)
 			{
 				ArmSpeedPID.ref = -200;
 				ArmSpeedPID.kp = 100.0f;
@@ -135,7 +135,7 @@ void Arm_Control(uint8_t heavy)
 			 PID_Calc_Arm(&ArmSpeedPID);
 				ARM_OUT_InPos = 0;
 			}
-			else if (ArmEncoder.ecd_value >ArmEncoder.ecd_bias - 170 * ARM_Angle_to_Encoder)//Almost there
+			else if (ArmEncoder.ecd_value >ArmEncoder.ecd_bias - 180 * ARM_Angle_to_Encoder)//Almost there
 			{
 				ArmSpeedPID.ref = -150;
 				ArmSpeedPID.kp = 120.0f;
@@ -146,8 +146,8 @@ void Arm_Control(uint8_t heavy)
 			else //when grabbing & lifting: hope the arm will stay still
 			{
 				ArmSpeedPID.ref = 0;
-				ArmSpeedPID.kp = 120.0f;
-				ArmSpeedPID.ki = 7;
+				ArmSpeedPID.kp = 0.0f; // was 120
+				ArmSpeedPID.ki = 0; // was 7
 				PID_Calc_Arm(&ArmSpeedPID);
 				ARM_OUT_InPos = 1;
 			}
@@ -234,12 +234,20 @@ void Collect_Control(void)
 			{
 				Lift_setHeight(HEIGHT0);
 			}
+			if(RC_CtrlData.rc.s1 == 1)
+			{
+				collectState = COLLECT_ALIGN;
+			}
 		}break;
 		case COLLECT_ALIGN:
 		{
 			Arm_Mode = ARM_IN;
 			Arm_Control(WITHOUT_BOX);
 			CLAW_DISABLE();
+			if(RC_CtrlData.rc.s1 == 3)
+			{
+				collectState = COLLECT_GRAB;
+			}
 		}break;
 		case COLLECT_GRAB:
 		{
@@ -248,6 +256,10 @@ void Collect_Control(void)
 			if(ARM_OUT_InPos==1)
 			{
 				CLAW_ENABLE();
+				if(RC_CtrlData.rc.s1 == 2)
+				{
+					collectState = COLLECT_POUR;
+				}
 			}
 		}break;
 		case COLLECT_POUR:
@@ -256,7 +268,10 @@ void Collect_Control(void)
 			Arm_Control(WITH_BOX);
 			if(ARM_IN_InPos==1)
 			{
-				
+				if(RC_CtrlData.rc.s1 == 3)
+				{
+					collectState = COLLECT_RELEASE;
+				}
 			}
 		}break;
 		case COLLECT_RELEASE:
@@ -266,6 +281,10 @@ void Collect_Control(void)
 			if(ARM_OUT_InPos==1)
 			{
 				CLAW_DISABLE();
+				if(RC_CtrlData.rc.s1 == 2)
+				{
+					collectState = COLLECT_REST;
+				}
 			}
 		}break;
 		default:

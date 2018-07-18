@@ -8,7 +8,7 @@
 #define LIFT_STAGE3 3
 
 // unit: millionmeters
-#define HEIGHT1 0
+#define HEIGHT0 0
 #define HEIGHT1 84
 #define HEIGHT2 100
 
