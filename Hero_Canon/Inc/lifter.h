@@ -19,6 +19,7 @@ void Lift_init(void);
 void Lift_setHeight(uint16_t mm);
 void Lift_hold(void);
 void Lift_idle(void);
+void Lift_stop(void);
 uint16_t getCurrentHeight(void);
 
 #endif

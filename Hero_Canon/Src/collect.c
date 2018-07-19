@@ -236,6 +236,11 @@ void Collect_Mode_Switch(void)
 
 void Collect_Control(void)
 {
+	if(getWorkState()==STOP_STATE)
+	{
+		Lift_stop();
+		return;
+	}
 	switch(collectState)
 	{
 		case COLLECT_REST:

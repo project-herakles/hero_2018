@@ -87,5 +87,7 @@ void stepper_stop(Stepper_Regulator_t *stp);
 void stepper_hold(Stepper_Regulator_t *stp);
 void stepper_idle(Stepper_Regulator_t *stp);
 void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw, float degree);
+void stepper_enable(Stepper_Regulator_t *stp);
+void stepper_disable(Stepper_Regulator_t *stp);
 
 #endif
