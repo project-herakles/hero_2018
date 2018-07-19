@@ -256,19 +256,21 @@ void TIM2_IRQHandler(void)
 	if(stepper_left.mode == MODE_SERVO)
 	{
 		// if pulse counts to 0, stop the stepper
-		if(stepper_left.pulses-- ==0)
+		if(--stepper_left.pulses==0)
 		{
 			stepper_stop(&stepper_left);
 			stepper_left.pulses = 0;
+			stepper_left.mode = MODE_MOTOR;
 		}
 	}
 	
 	if(stepper_right.mode == MODE_SERVO)
 	{
-		if(stepper_left.pulses-- ==0)
+		if(--stepper_right.pulses==0)
 		{
 			stepper_stop(&stepper_right);
 			stepper_right.pulses = 0;
+			stepper_right.mode = MODE_MOTOR;
 		}
 	}
   /* USER CODE END TIM2_IRQn 0 */

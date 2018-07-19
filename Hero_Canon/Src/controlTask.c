@@ -353,6 +353,7 @@ void Control_Loop(void)
 
 	workStateFSM();
 	Gimbal_Control();
+	Shoot_Control();
 	GMArmShootControl();
 	
 	if(time_tick_ms%4==0)
@@ -363,6 +364,4 @@ void Control_Loop(void)
 	//Collect_Mode_Switch();
 	if(workState == NORMAL_STATE)
 		Collect_Control();
-	
-	Shoot_Control();
 }

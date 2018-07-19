@@ -33,7 +33,7 @@
 #define MODE_SERVO 1
 // The number of pulses it takes to revolve one cycle
 #define FULL_REV 200
-#define RADIUS 15
+#define RADIUS 15.0f
 #define RPM2RADIAN 0.1047
 #define STEP_ANGLE 1.8
 

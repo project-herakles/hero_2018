@@ -15,6 +15,7 @@ void Lift_init(void)
 	stepper_init(&stepper_left);
 	stepper_init(&stepper_right);
 }
+float degree2turn;
 void Lift_setHeight(uint16_t mm)
 {
 	if(setHeightFlag==0) // calls rotate function once
@@ -22,15 +23,17 @@ void Lift_setHeight(uint16_t mm)
 		lift_start_time = getCurrentTimeTick();
 		if(currentHeight < mm)
 		{
+			degree2turn = (mm-currentHeight)/RADIUS*(180.0f/pi);
 			stepper_rotate(&stepper_left,COUNTER_CLOCKWISE,(mm-currentHeight)/RADIUS*(180.0f/pi));
 			stepper_rotate(&stepper_right,CLOCKWISE,(mm-currentHeight)/RADIUS*(180.0f/pi));
 			setHeightFlag = 1;
 		}
 		else if(currentHeight > mm)
 		{
-			Lift_hold(); // going downwards. Lift up the frame a bit to ensure successful unlatch
-			stepper_rotate(&stepper_left,CLOCKWISE,(mm-currentHeight)/RADIUS*(180.0f/pi));
-			stepper_rotate(&stepper_right,COUNTER_CLOCKWISE,(mm-currentHeight)/RADIUS*(180.0f/pi));
+			degree2turn = (mm-currentHeight)/RADIUS*(180.0f/pi);
+			//Lift_hold(); // going downwards. Lift up the frame a bit to ensure successful unlatch
+			stepper_rotate(&stepper_left,CLOCKWISE,(currentHeight-mm)/RADIUS*(180.0f/pi));
+			stepper_rotate(&stepper_right,COUNTER_CLOCKWISE,(currentHeight-mm)/RADIUS*(180.0f/pi));
 			setHeightFlag = 1;
 		}
 	}

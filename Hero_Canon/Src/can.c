@@ -352,8 +352,6 @@ void set_GM_speed(int16_t yaw_iq,int16_t pitch_iq)
 	canTxMsg1[1] = (unsigned char) yaw_iq;
 	canTxMsg1[2] = (unsigned char)(pitch_iq >> 8);
 	canTxMsg1[3] = (unsigned char) pitch_iq;
-	//canTxMsg[6] = (unsigned char) (2000 >> 8);
-	//canTxMsg[7] = (unsigned char) 2000; //for M2006 testing
 	
 	//CAN_SendMsg(&hcan1,&can1TxHeader1,canTxMsg);
 	//move downwards, send msg after set_shoot_speed

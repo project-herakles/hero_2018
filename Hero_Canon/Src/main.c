@@ -124,6 +124,7 @@ int main(void)
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start_IT(&htim2);
 	Test_Task_Init();
+	Collect_Control_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */

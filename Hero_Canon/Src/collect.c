@@ -24,6 +24,10 @@ PID_Regulator_t ArmSpeedPID = ARM_SPEED_PID_DEFAULT;
 extern volatile Encoder ArmEncoder;
 extern RC_Ctrl_t RC_CtrlData;
 
+void Collect_Control_Init(void)
+{
+	Lift_init();
+}
 void Arm_Control(uint8_t heavy)
 {	
 	if(ArmSpeedPID.ki == 0)
@@ -237,7 +241,7 @@ void Collect_Control(void)
 			{
 				Lift_setHeight(HEIGHT0);
 			}
-			if(RC_CtrlData.rc.s1 == 1)
+			if(RC_CtrlData.rc.s1 == 3)
 			{
 				collectState = COLLECT_ALIGN;
 			}
@@ -248,8 +252,9 @@ void Collect_Control(void)
 			Arm_Control(WITHOUT_BOX);
 			CLAW_DISABLE();
 			Lift_setHeight(HEIGHT1);
-			if(RC_CtrlData.rc.s1 == 3)
+			if(RC_CtrlData.rc.s1 == 2)
 			{
+				delay_start_time = getCurrentTimeTick();
 				collectState = COLLECT_GRAB;
 			}
 		}break;
@@ -261,7 +266,7 @@ void Collect_Control(void)
 			{
 				CLAW_ENABLE();
 				Lift_setHeight(HEIGHT2);
-				if(getCurrentHeight()==HEIGHT2)
+				if(getCurrentHeight()==HEIGHT2 && getCurrentTimeTick()-delay_start_time>GRAB_DELAY)
 				{
 					delay_start_time = getCurrentTimeTick();
 					collectState = COLLECT_POUR;
