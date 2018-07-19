@@ -48,6 +48,10 @@ void Lift_setHeight(uint16_t mm)
 	{
 		LIFT_LATCHED();
 	}
+	else
+	{
+		LIFT_UNLATCH();
+	}
 	
 	if(stepper_left.pulses==0 && stepper_right.pulses==0)
 	{

@@ -2,6 +2,7 @@
 #include "tim.h"
 #include "gpio.h"
 #include "controlTask.h"
+#include "stdint.h"
 
 Stepper_Regulator_t stepper_left = STEPPER_LEFT_REGULATOR_DEFAULT;
 Stepper_Regulator_t stepper_right = STEPPER_RIGHT_REGULATOR_DEFAULT;
@@ -234,7 +235,7 @@ void stepper_rotate(Stepper_Regulator_t *stp,uint8_t cw,float degree)
 {
 	stepper_start(stp);
 	stepper_setDir(stp,cw);
-	stp->pulses = degree/STEP_ANGLE;
+	stp->pulses = (uint32_t)(degree/STEP_ANGLE);
 	stp->mode = MODE_SERVO;
 }
 
