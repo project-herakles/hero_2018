@@ -50,6 +50,7 @@
 #include "controlTask.h"
 #include "imu_task.h"
 #include "gun.h"
+#include "collect.h"
 extern uint8_t RemoteBuffer[8];
 extern DMA_HandleTypeDef hdma_usart1_rx;
 extern uint8_t collect_mode_code;
@@ -123,7 +124,7 @@ int main(void)
 	
 	HAL_TIM_Base_Start_IT(&htim6);
 	HAL_TIM_Base_Start_IT(&htim2);
-	Test_Task_Init();
+	//Test_Task_Init();
 	Collect_Control_Init();
   /* USER CODE END 2 */
 

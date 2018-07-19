@@ -27,6 +27,13 @@ extern RC_Ctrl_t RC_CtrlData;
 void Collect_Control_Init(void)
 {
 	Lift_init();
+	__HAL_RCC_GPIOF_CLK_ENABLE();
+	GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 }
 void Arm_Control(uint8_t heavy)
 {	
