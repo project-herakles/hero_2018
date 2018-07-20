@@ -292,7 +292,7 @@ void FrictionWheelControl(void)
 	//if(RC_CtrlData.rc.s2 == 1)
 	if(getWorkState() == NORMAL_STATE && RC_CtrlData.rc.s1==1)
 	{
-		SetFrictionWheelSpeed(1800);
+		SetFrictionWheelSpeed(1400);
 	}
 	else
 	{
@@ -309,10 +309,12 @@ void shootMotorControl(void)
 		ShootSpeedPID.fdb = ShootEncoder.filter_rate;
 		PID_Calc_Debug(&ShootSpeedPID,10,0.002,0); 
 		set_Shoot_speed(ShootSpeedPID.output); //Trigger Motor PID here
+		LASER_ON();
 	}
 	else
 	{ 
 		set_Shoot_speed(0);
+		LASER_OFF();
 		// Trigger Motor stop
 	}
 }
