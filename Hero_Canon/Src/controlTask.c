@@ -292,7 +292,7 @@ void FrictionWheelControl(void)
 	//if(RC_CtrlData.rc.s2 == 1)
 	if(getWorkState() == NORMAL_STATE && RC_CtrlData.rc.s1==1)
 	{
-		SetFrictionWheelSpeed(1400);
+		SetFrictionWheelSpeed(1200);
 	}
 	else
 	{
